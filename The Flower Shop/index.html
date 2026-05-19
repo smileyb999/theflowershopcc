@@ -1,0 +1,2643 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-version="v49">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FBF8F2" media="(prefers-color-scheme: light)">
+<meta name="color-scheme" content="dark light">
+<title>The Flower Shop Coffee Co.</title>
+<script>
+/* Refresh always starts at hero/top. Disable browser scroll
+   restoration as early as possible (head-level, pre-body-parse) so
+   Chrome/Safari don't restore the prior scroll position on reload.
+   The full boot veil is set up in the next inline script. */
+try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch(_){}
+/* v28: paint a boot veil on <html> at the earliest possible moment so
+   the page never flashes its restored scroll position or the wrong nav
+   state before the hero is ready. The veil class is removed once fonts
+   + load + a top-of-page scroll reset have all settled. */
+(function(){
+  try { document.documentElement.classList.add('booting'); } catch(_){}
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   THE FLOWER SHOP COFFEE CO. — v52
+   Display: Bungee (hero + ticker only) · Body/UI/Numbers: Manrope
+   Hero reveal: pure CSS keyframes (migrated from JS in v40).
+   v41–v48: smoothScrollTo removal, yellow palette consolidation,
+   container restraint + spotlight glow + active-state polish, mode-
+   dependent section pills + about-badge, menu/FAQ/footer hover-yellow
+   restraint, glow intensity tuned to 0.12.
+   v49: replaced 5 fabricated review cards with 7 condensed real Yelp
+   reviews (Joshua G, Karen B, Stacie M, Robin R, Sophia L, Chris &amp;
+   Michelle M, Juanita W). Contact-page review stack expanded 3 → 4
+   one-liners (Chloe J / Juanita W / Lissette A / Kaitlyn A). Removed
+   the .seasonal::before sun aperture (dark + light). About-info block
+   (4 icon+text rows) removed from About section. Footer reorganized:
+   brand column gets a 3-pill stack (IG / Find Us / Call Us), "Find Us"
+   column slimmed to just Hours.
+   v50: removed .seasonal::after top-edge highlight entirely. Ticker
+   yellow glow effects (::before + ::after) recolored to white.
+   Footer hybrid: yellow brand heading + small tagline stay at top of
+   brand column. IG pill moved out of brand pill stack — mobile
+   shows it as "Follow" pill at end of stack, desktop hides it and
+   instead shows a "Follow Us" + circular IG icon section above Hours
+   in the right column. Brewhaus-style giant mega-brand watermark at
+   bottom was attempted and pulled — clipped horizontally and didn't
+   earn its size.
+   v51: photos plugged in. Hero: raspmatcha hero shot. Seasonal cards:
+   Bluebonnet Nectar → bluebonnet1 field shot, Baklava Oat → baklava
+   espresso pour, Banana Jam Latte → banana toast + iced latte (pos-
+   top-right to keep the drink in frame), Bluebonnet Iced Earl Grey →
+   bluebonnet2 close-up. About: couple in front of truck (pos-right
+   to keep both people in the squircle crop). Gallery "Inside the
+   window" trio: owner in truck window (caption now "At the Window"),
+   mocha (caption "In the Cup"), tea + menu shot (caption "Tea Time").
+   v52: actual brand logo plugged in — replaces the abstract bee SVG
+   in .s-logo (sidebar), .m-logo (mobile pill), and the ticker-bee
+   separator. Yellow background and the ticker-bee yellow border were
+   dropped since the logo has its own cream-rim circular design. Glow
+   halo on the sidebar logo and the spin animations (20s sidebar/mobile,
+   16s ticker) preserved.
+
+   Interaction model (current):
+   - Cross-view nav (main ↔ contact) uses fade-out → reposition
+     while hidden → fade-in. No visible "land on hero then scroll"
+     jump. Hero boot only replays for intentional Home/Hero nav.
+   - Same-view nav (main → menu/about/reviews/faq) uses native
+     scrollIntoView({behavior:'smooth'}) with scrollend-driven nav lock
+     so the clicked button stays highlighted while passing through
+     intermediate sections.
+   - Route-transitioning lock: while a view swap is in flight,
+     html.route-transitioning sets overflow:hidden + scroll-behavior:auto
+     on html+body so the browser can't animate window.scrollY upward
+     when a long main view is swapped for the shorter contact view,
+     and hides the scroll rail so it doesn't flash mid-transition.
+   - Chrome tagline split joins spans with no whitespace text nodes
+     (those were the jitter source when filter:blur transitioned
+     next to them).
+   - Nav shape: sidebar 28px, mobile pill 22px — rectangular-rounded
+     to match the ticker.
+   ============================================================ */
+:root{
+  /* V22: dark mode warmed slightly. Pure-black canvas kept, but elevated
+     surfaces now carry a hair of warmth so cards lift off background instead
+     of muddying together.
+     V23–V25: brand-yellow drifted lighter to #FFE361 (bright citrus).
+     v42 trial swapped to a warmer #FACA2C to match her logo/truck — read
+     too chain-restaurant against the dark canvas, reverted in v43.
+     Single token now (was 8 variants); alpha tints handle hover/glow. */
+  --bg-primary:#000000;
+--bg-secondary:#030303;
+--bg-elevated:#080808;
+--bg-card:#030303;
+--bg-card-hover:#101010;
+  --brand-yellow:#FFE847;
+  --brand-yellow-dim:rgba(255,232,71,0.09);
+  --brand-yellow-glow:rgba(255,232,71,0.22);
+  --brand-yellow-glow-strong:rgba(255,232,71,0.34);
+  --border-yellow-soft:rgba(255,232,71,0.24);
+  --mint:#A8D8B9;
+  --lavender:#C4B1D4;
+  --soft-pink:#F2C4CE;
+  --cream:#FFF8EE;
+  --text-primary:#FFFFFF;
+  --text-secondary:#9A9A9A;
+  --text-tertiary:#525252;
+--border-subtle:rgba(255,232,71,0.07);
+--border-card:rgba(255,232,71,0.16);
+--border-yellow:rgba(255,232,71,0.14);
+  --shadow-card:0 2px 16px rgba(0,0,0,0.3);
+  --shadow-hover:0 16px 48px rgba(0,0,0,0.45);
+  --nav-w:72px;
+  --nav-h-m:60px;
+  --r-sm:8px; --r-md:12px; --r-lg:18px; --r-xl:24px;
+  --ease-out:cubic-bezier(0.22,1,0.36,1);
+  --ease-spring:cubic-bezier(0.34,1.56,0.64,1);
+  --ease-smooth:cubic-bezier(0.22,1,0.36,1);
+  --tc:background-color 0.55s cubic-bezier(0.4,0,0.2,1), color 0.55s cubic-bezier(0.4,0,0.2,1), border-color 0.55s cubic-bezier(0.4,0,0.2,1), box-shadow 0.55s cubic-bezier(0.4,0,0.2,1);
+}
+[data-theme="light"]{
+  /* V22: light mode warmed. No more flat #FFFFFF — cream-tinted surfaces
+     so the site reads "premium editorial" rather than "sterile product UI".
+     V25: yellow accents tracked one step lighter. */
+  --bg-primary:#FBF8F2;
+  --bg-secondary:#F6F2E8;
+  --bg-elevated:#FFFCF5;
+  --bg-card:#FFFCF5;
+  --bg-card-hover:#FBF8F0;
+  --brand-yellow-dim:rgba(225,180,20,0.07);
+  --brand-yellow-glow:rgba(225,180,20,0.18);
+  --brand-yellow-glow-strong:rgba(225,180,20,0.26);
+  --border-yellow-soft:rgba(225,180,20,0.3);
+  --text-primary:#1A1815;
+  --text-secondary:#6E6962;
+  --text-tertiary:#B8B2A6;
+  --border-subtle:rgba(50,40,20,0.07);
+  --border-card:rgba(180,135,10,0.16);
+  --border-yellow:rgba(196,143,0,0.13);
+  --shadow-card:0 2px 14px rgba(60,40,10,0.05);
+  --shadow-hover:0 16px 48px rgba(60,40,10,0.08);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;background:var(--bg-primary);transition:background-color 0.4s var(--ease-smooth)}
+html[data-theme="dark"]{background:#000000}
+html[data-theme="light"]{background:#FBF8F2}
+body{font-family:'Manrope',sans-serif;background:var(--bg-primary);color:var(--text-primary);overflow-x:hidden;transition:var(--tc)}
+body[data-theme-fallback="dark"],html[data-theme="dark"] body{background:#000000}
+body[data-theme-fallback="light"],html[data-theme="light"] body{background:#FBF8F2}
+/* v37: while a theme toggle is in flight, suppress background-color
+   transitions on the layers that iOS Safari samples for its toolbar/pill
+   tint (html, body, and the fixed mobile-nav glass). Their bg snaps to
+   the new theme on the same frame as the meta[name="theme-color"]
+   update, so the address-bar pill doesn't sit over a stale rectangle.
+   Other elements keep their normal --tc cross-fade. The class is added
+   for ~2 frames inside theme() and then removed. */
+html.theme-switching,
+html.theme-switching body,
+html.theme-switching .m-nav,
+html.theme-switching .m-nav::before{transition:none !important}
+::selection{background:var(--brand-yellow);color:#000}
+button{font-family:inherit}
+
+/* ======== SIDEBAR — ARCHITECTURAL FLOATING RAIL ======== */
+/* V22: softer glow, calmer shadow stack. Active-state ring deliberate,
+   not loud. Light mode uses the new cream surface tokens.
+   V25: corner radius dropped from 44px (capsule) to 28px (rectangular-
+   rounded), echoing the ticker. Still soft, less oval. Width/placement
+   untouched. */
+.sidebar{position:fixed;top:24px;bottom:24px;left:24px;width:72px;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:20px;display:flex;flex-direction:column;align-items:center;padding:24px 0;z-index:100;transition:var(--tc), box-shadow 0.3s;box-shadow:0 4px 24px rgba(0,0,0,0.25)}
+[data-theme="light"] .sidebar{border-color:rgba(0,0,0,0.55);box-shadow:0 4px 24px rgba(60,40,10,0.06)}
+.s-logo{width:48px;height:48px;border-radius:50%;background:transparent;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px var(--brand-yellow-glow);animation:spin 20s linear infinite;transition:box-shadow 0.3s;flex-shrink:0;overflow:hidden;padding:0}
+.s-logo:hover{box-shadow:0 0 32px var(--brand-yellow-glow-strong)}
+.s-logo img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.s-icons{display:flex;flex-direction:column;gap:16px;margin-top:auto;margin-bottom:auto}
+.s-btn{width:44px;height:44px;border-radius:50%;background:transparent;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-primary);position:relative;transition:transform 0.4s var(--ease-smooth)}
+.s-btn svg{width:20px;height:20px;display:block;position:relative;z-index:1}
+.s-btn::before{content:'';position:absolute;top:50%;left:50%;width:64px;height:64px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle, rgba(255,232,71,0.12) 0%, rgba(255,232,71,0) 65%);opacity:0;transition:opacity 0.3s ease;pointer-events:none}
+.s-btn:hover{transform:scale(1.04)}
+.s-btn:hover::before{opacity:0.6}
+.s-btn.on::before{opacity:1}
+.s-btn::after{content:attr(data-tip);position:absolute;left:calc(100% + 14px);top:50%;transform:translateY(-50%) translateX(-4px);background:var(--bg-elevated);color:var(--text-primary);font-size:11px;font-weight:600;letter-spacing:0.06em;padding:6px 12px;border-radius:var(--r-sm);border:1px solid var(--border-card);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 0.18s, transform 0.18s;text-transform:uppercase;z-index:200}
+.s-btn:hover::after{opacity:1;transform:translateY(-50%) translateX(0)}
+.s-theme{margin-top:auto;width:44px;height:44px;border-radius:50%;background:transparent;border:1px solid var(--border-subtle);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-primary);position:relative;transition:all 0.3s var(--ease-spring);flex-shrink:0}
+.s-theme svg{width:18px;height:18px;position:relative;z-index:1}
+.s-theme::before{content:'';position:absolute;top:50%;left:50%;width:64px;height:64px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle, rgba(255,232,71,0.12) 0%, rgba(255,232,71,0) 65%);opacity:0;transition:opacity 0.3s ease;pointer-events:none}
+.s-theme:hover{transform:rotate(20deg)}
+.s-theme:hover::before{opacity:1}
+[data-theme="dark"] .icon-moon{display:none}
+[data-theme="light"] .icon-sun{display:none}
+
+/* ======== MOBILE NAV — FLOATING BAR ======== */
+/* V25: corner radius dropped from 9999px (full pill) to 22px
+   (rectangular-rounded), matching the ticker/sidebar language.
+   Position, height, icons, and behavior untouched.
+   v36: the fixed outer .m-nav element is now transparent — its glass
+   background, backdrop-filter, border, and shadow are rendered via an
+   inner ::before pseudo-element instead. iOS Safari's address-bar pill
+   sometimes samples the underlying fixed layer when deciding its tint;
+   keeping the outer fixed element transparent makes it less likely to
+   pull the toolbar onto a solid rectangle. Visual layout is unchanged. */
+.m-nav{display:none;position:fixed;top:calc(12px + env(safe-area-inset-top, 0px));left:12px;right:12px;height:52px;background:transparent;border:none;border-radius:22px;align-items:center;padding:0 14px;z-index:100;transition:var(--tc);box-shadow:none}
+.m-nav::before{content:"";position:absolute;inset:0;border-radius:inherit;background:rgba(10,10,10,0.7);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);border:1px solid var(--border-subtle);box-shadow:0 4px 20px rgba(0,0,0,0.22);pointer-events:none;z-index:-1;transition:var(--tc)}
+[data-theme="light"] .m-nav::before{background:rgba(255,255,255,0.75);border-color:rgba(0,0,0,0.55);box-shadow:0 4px 20px rgba(0,0,0,0.05)}
+.m-logo{width:36px;height:36px;border-radius:50%;background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;animation:spin 20s linear infinite;border:none;cursor:pointer;overflow:hidden;padding:0}
+.m-logo img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
+.m-icons{display:flex;gap:2px;margin:0 auto}
+.m-btn{width:40px;height:40px;border-radius:50%;background:transparent;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-primary);position:relative;transition:all 0.2s}
+.m-btn svg{width:19px;height:19px;position:relative;z-index:1}
+.m-btn::before{content:'';position:absolute;top:50%;left:50%;width:60px;height:60px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle, rgba(255,232,71,0.12) 0%, rgba(255,232,71,0) 65%);opacity:0;transition:opacity 0.3s ease;pointer-events:none}
+.m-btn:hover::before,.m-btn.on::before{opacity:1}
+.m-theme{width:36px;height:36px;border-radius:50%;background:transparent;border:1px solid var(--border-subtle);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-primary);position:relative;transition:transform 0.3s var(--ease-spring);flex-shrink:0}
+.m-theme svg{width:16px;height:16px;position:relative;z-index:1}
+.m-theme::before{content:'';position:absolute;top:50%;left:50%;width:56px;height:56px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle, rgba(255,232,71,0.12) 0%, rgba(255,232,71,0) 65%);opacity:0;transition:opacity 0.3s ease;pointer-events:none}
+.m-theme:hover{transform:rotate(20deg)}
+.m-theme:hover::before{opacity:1}
+
+/* ======== PAGE ======== */
+/* V31: page is the canvas. No outer bordered shell — sections float
+   on the page as independent cards with breathing room between them. */
+.page{padding-left:calc(72px + 48px);padding-right:24px;padding-top:24px;padding-bottom:24px;min-height:100vh}
+/* V31: .frame stays in the DOM because route/view transition classes
+   (.view-leaving / .view-entering / .view-swapping) are scoped to it,
+   but its visible chrome is removed. No border, no page-wide shadow,
+   no clipping that would crop section shadows/cards. The site reads as
+   independent floating sections on a canvas, not one site inside a box.
+   The transition machinery still operates on this element. */
+.frame{background:transparent;transition:var(--tc);position:relative}
+[data-theme="light"] .frame{background:transparent}
+
+/* ======== VIEW SWITCH (main / contact) ======== */
+/* Cross-view nav uses a deliberate fade-out → reposition → fade-in.
+   No transform on the view itself (that produced the "land on hero
+   then scroll down" feel). The active view always starts visible;
+   .frame.view-leaving fades the active view to 0 quickly. Once the
+   swap + reposition happens while the frame is hidden, .frame.view-entering
+   fades the new active view back in. Same-view section nav doesn't
+   touch these classes — native scrollIntoView({behavior:'smooth'}) handles it. */
+.view{display:none}
+/* V31: when active, .view stacks its child sections with breathing room
+   so each major area reads as an independent floating card. The opacity
+   transition behavior for cross-view nav is unchanged. */
+.view.on{display:flex;flex-direction:column;gap:24px;opacity:1;transition:opacity 0.26s cubic-bezier(0.22,1,0.36,1)}
+.frame.view-leaving .view.on{opacity:0;transition:opacity 0.2s cubic-bezier(0.4,0,1,1)}
+.frame.view-entering .view.on{opacity:0}
+/* Suppress pointer events for the brief reposition window so a stray
+   click on a fading-out element can't fire mid-transition. */
+.frame.view-entering, .frame.view-leaving{pointer-events:none}
+/* During the swap+reposition tick the document height changes and the
+   browser may clamp scroll position. Even though .view.on is at opacity 0,
+   a layout-height shift can produce a visible upward scroll under the fade.
+   Hide the whole frame for the instant the swap happens so no scroll/layout
+   motion is visible. .view-swapping is only set for the single tick where
+   we change .on + reset scroll. */
+.frame.view-swapping{visibility:hidden}
+
+/* ======== ROUTE TRANSITION VEIL (page-level) ======== */
+/* The .frame-level hide isn't enough on its own — the scroll rail lives
+   outside .frame and still reacts to scroll events, which would surface
+   a thin progress bar mid-route-swap. We promote a class to <html> for
+   the duration of the route transition that hides the frame AND the
+   scroll rail together.
+   V29: also lock the document-level scroll. Hiding .frame alone still
+   lets the browser clamp window.scrollY when the document height shrinks
+   (e.g. long Menu page → short Contact view), which produced a visible
+   upward scroll under the fade. overflow:hidden on html+body removes the
+   native scrollbar and prevents that clamp from animating. scroll-behavior
+   is forced to auto so any scrollTo during the swap is instantaneous and
+   never inherits the global html{scroll-behavior:smooth}.
+   V30: separated concerns — route-transitioning now ONLY locks document
+   scroll + hides the scroll rail. The frame is hidden by a separate,
+   short-lived .view-swapping (set on .frame) that covers only the
+   instantaneous DOM swap + reposition tick, so the target view fades in
+   immediately afterwards instead of waiting behind a hidden frame. */
+html.route-transitioning,
+html.route-transitioning body{overflow:hidden !important;scroll-behavior:auto !important}
+html.route-transitioning .scroll-rail{opacity:0 !important;transition:none !important}
+
+/* ======== BOOT VEIL (initial load) ======== */
+/* Set on <html> in the head-level inline script before anything paints.
+   Hides the page frame, nav, and scroll rail so a refresh from a deep
+   scroll position never shows the restored offset, and the nav never
+   flickers into the wrong active state before JS has set Home. The veil
+   is removed once fonts + load + scroll-to-top have all settled; the
+   removal uses a short soft fade. */
+html.booting .frame,
+html.booting .sidebar,
+html.booting .m-nav{opacity:0}
+html.booting .scroll-rail{opacity:0 !important;transition:none !important}
+html.boot-fading .frame,
+html.boot-fading .sidebar,
+html.boot-fading .m-nav{opacity:1;transition:opacity 0.45s cubic-bezier(0.22,1,0.36,1)}
+
+/* ======== CART BADGE ======== */
+/* The glow is rendered as a ::before pseudo-element rather than a single
+   box-shadow on the button, so the soft falloff doesn't get hard-cut at
+   the bottom of the viewport. The pseudo extends beyond the button on
+   all sides and is pointer-events:none, while the button itself stays
+   exactly the same size for clicks. Bottom offset honours
+   env(safe-area-inset-bottom) so the glow has breathing room on iOS. */
+.cart-fab{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom, 0px));right:24px;width:56px;height:56px;border-radius:50%;background:var(--brand-yellow);color:#0A0A0A;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:90;transition:transform 0.3s var(--ease-spring);opacity:0;transform:translateY(20px) scale(0.85);pointer-events:none}
+.cart-fab::before{content:"";position:absolute;left:50%;top:50%;width:160%;height:160%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle at 50% 50%, var(--brand-yellow-glow-strong) 0%, var(--brand-yellow-glow) 38%, rgba(255,232,71,0) 70%);pointer-events:none;z-index:-1;opacity:0.9;transition:opacity 0.3s ease, transform 0.3s var(--ease-spring)}
+.cart-fab.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+.cart-fab:hover{transform:translateY(-4px) scale(1.06)}
+.cart-fab:hover::before{opacity:1;transform:translate(-50%,-50%) scale(1.08)}
+.cart-fab svg{width:22px;height:22px}
+.cart-count{position:absolute;top:-4px;right:-4px;background:#0A0A0A;color:var(--brand-yellow);font-family:'Manrope',sans-serif;font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--brand-yellow);z-index:1}
+.cart-pop{animation:cartPop 0.4s var(--ease-spring)}
+@keyframes cartPop{0%{transform:scale(1)}50%{transform:scale(1.18)}100%{transform:scale(1)}}
+
+/* ============================================================
+   HERO — AMBIENT SUNLIGHT, NOT CONTAINED SPOTLIGHT
+   V23: gradient retuned. Wider, airier sun aperture; reduced
+   hot-core saturation (was reading metallic); softer/longer
+   bottom taper so atmosphere bleeds across the seam into the
+   seasonal band. Pairs with seasonal::before for one continuous
+   sunlit top-of-page.
+   ============================================================ */
+/* ============================================================
+   HERO — STANDALONE BORDERED FRONT CARD
+   V31: the hero is now a self-contained floating card with a clean
+   border and a simple yellow surface. The radial spotlight, the
+   linear bottom-fade, and the seasonal::before yellow bleed are all
+   gone. No spotlight, no glow-heavy gradients — a premium, intentional
+   yellow panel that holds the brand. All hero text animation behavior
+   is preserved.
+   ============================================================ */
+.hero{position:relative;min-height:calc(100vh - 80px);overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 56px;isolation:isolate;
+  background-color:#FFE361;
+  border:1px solid rgba(0,0,0,0.12);
+  border-radius:32px;
+  box-shadow:0 12px 40px rgba(0,0,0,0.28), 0 0 0 1px var(--border-subtle)}
+[data-theme="light"] .hero{
+  background-color:#FFE361;
+  border:1px solid rgba(0,0,0,0.10);
+  box-shadow:0 10px 32px rgba(60,40,10,0.10), 0 0 0 1px rgba(0,0,0,0.04)}
+
+/* Subtle dither to break gradient banding — kept tiny, no blend mode.
+   V31: border-radius matches the hero card so the grain doesn't paint
+   past the rounded corners. */
+.hero-grain{position:absolute;inset:0;opacity:0.05;pointer-events:none;z-index:0;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");border-radius:32px}
+[data-theme="light"] .hero-grain{opacity:0.035}
+
+/* Photo hint label */
+.hero-hint{position:absolute;top:24px;left:24px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(0,0,0,0.45);font-weight:600;pointer-events:none;z-index:2}
+[data-theme="light"] .hero-hint{color:rgba(0,0,0,0.4)}
+
+.hero-content{position:relative;z-index:2;text-align:center;max-width:900px}
+/* v40 hero reveal — timing variables lifted from playHeroReveal JS into CSS.
+   Edit these to retune the cadence; no JS changes required. */
+:root{
+  --hero-head-start:380ms;
+  --hero-head-stagger:32ms;
+  --hero-head-dur:550ms;
+  --hero-tag-gap:120ms;
+  --hero-tag-stagger:72ms;
+  --hero-tag-dur:550ms;
+  --hero-btn-gap:220ms;
+  --hero-btn-dur:700ms;
+  --hero-lit-shadow:0 4px 36px rgba(0,0,0,0.28), 0 0 22px rgba(255,232,71,0.26), 0 0 48px rgba(255,232,71,0.14);
+}
+[data-theme="light"]{
+  --hero-lit-shadow:0 4px 36px rgba(0,0,0,0.22), 0 0 24px rgba(255,232,71,0.42), 0 0 52px rgba(255,232,71,0.2);
+}
+@keyframes heroCharIn{to{opacity:1;transform:translateY(0);filter:blur(0)}}
+@keyframes heroWordIn{to{opacity:1;transform:translateY(0);filter:blur(0)}}
+@keyframes heroButtonsIn{to{opacity:1;transform:translateY(0)}}
+@keyframes heroLitOn{to{text-shadow:var(--hero-lit-shadow)}}
+
+.hero-brand{font-family:'Bungee',sans-serif;font-weight:400;font-size:clamp(64px,11vw,156px);line-height:1.0;letter-spacing:0;color:#FFFFFF;text-shadow:0 4px 36px rgba(0,0,0,0.28);animation:heroLitOn 1.2s cubic-bezier(0.22,1,0.36,1) forwards;animation-delay:calc(var(--hero-head-start) + var(--ch-count,15) * var(--hero-head-stagger) + var(--hero-head-dur) + 60ms)}
+[data-theme="light"] .hero-brand{color:#FFFFFF;text-shadow:0 4px 36px rgba(0,0,0,0.22)}
+.hero-brand .word{display:inline-block;white-space:nowrap}
+/* v40: per-char reveal is pure CSS. --i is set inline per char by splitHeroBrand;
+   --ch-count is set on .hero (cascades to descendants). animation-delay does the
+   staggered cadence the JS used to compute. Same 6px-blur-to-clarity feel. */
+.hero-brand .ch{display:inline-block;opacity:0;transform:translateY(16px);filter:blur(6px);animation:heroCharIn var(--hero-head-dur) cubic-bezier(0.22,1,0.36,1) forwards;animation-delay:calc(var(--hero-head-start) + var(--i,0) * var(--hero-head-stagger))}
+.hero-brand .ch.sp{width:0.28em;display:inline-block}
+/* Pre-split veil: brand/tagline parents hidden until JS splits them.
+   Prevents raw-text flash on full refresh. */
+.hero-brand.pre, .hero-tagline.pre{opacity:0}
+/* v40: animation freeze. html.booting holds animations during boot so the
+   cinematic reveal can't burn down behind the boot veil. .hero.no-anim is
+   toggled by playHeroReveal for replays — add it, force reflow, remove it
+   on next frame → CSS animations re-fire from their first keyframe. */
+.hero.no-anim .hero-brand,
+.hero.no-anim .hero-brand .ch,
+.hero.no-anim .hero-tagline .w,
+.hero.no-anim .hero-buttons,
+html.booting .hero-brand,
+html.booting .hero-brand .ch,
+html.booting .hero-tagline .w,
+html.booting .hero-buttons{animation:none !important}
+
+.hero-tagline{margin-top:28px;font-family:'Manrope',sans-serif;font-size:clamp(16px,1.6vw,19px);font-weight:500;color:#FFFFFF;max-width:560px;margin-left:auto;margin-right:auto;line-height:1.5;letter-spacing:0.005em;text-shadow:0 2px 18px rgba(0,0,0,0.28)}
+[data-theme="light"] .hero-tagline{color:#FFFFFF;text-shadow:0 2px 18px rgba(0,0,0,0.22)}
+/* v40: per-word reveal. animation-delay waits for the headline to land
+   (head-start + ch-count * stagger + head-dur + tag-gap) then staggers per word.
+   vertical-align/backface kept from V25 Chrome stability fix. */
+.hero-tagline .w{display:inline-block;vertical-align:baseline;opacity:0;transform:translateY(12px);filter:blur(4px);margin-right:0.28em;backface-visibility:hidden;-webkit-backface-visibility:hidden;animation:heroWordIn var(--hero-tag-dur) cubic-bezier(0.22,1,0.36,1) forwards;animation-delay:calc(var(--hero-head-start) + var(--ch-count,15) * var(--hero-head-stagger) + var(--hero-head-dur) + var(--hero-tag-gap) + var(--i,0) * var(--hero-tag-stagger))}
+
+.hero-buttons{margin-top:38px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;opacity:0;transform:translateY(16px);animation:heroButtonsIn var(--hero-btn-dur) cubic-bezier(0.22,1,0.36,1) forwards;animation-delay:calc(var(--hero-head-start) + var(--ch-count,15) * var(--hero-head-stagger) + var(--hero-head-dur) + var(--hero-tag-gap) + var(--w-count,5) * var(--hero-tag-stagger) + var(--hero-tag-dur) + var(--hero-btn-gap))}
+.btn{font-family:'Manrope',sans-serif;font-weight:600;font-size:14px;letter-spacing:0.01em;padding:14px 26px;border-radius:9999px;background:transparent;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:transform 0.45s var(--ease-smooth), box-shadow 0.45s var(--ease-smooth), background 0.45s ease, color 0.45s ease, border-color 0.45s ease}
+/* Dark mode default: white outline + white text on both */
+.btn-primary,.btn-outline{color:#FFFFFF;border:1.5px solid rgba(255,255,255,0.6)}
+.btn-primary:hover,.btn-outline:hover{background:rgba(255,255,255,0.1);border-color:#FFFFFF;transform:translateY(-2px)}
+/* Light mode default: dark outline + dark text on both */
+[data-theme="light"] .btn-primary,[data-theme="light"] .btn-outline{color:#0A0A0A;border:1.5px solid rgba(10,10,10,0.55)}
+[data-theme="light"] .btn-primary:hover,[data-theme="light"] .btn-outline:hover{background:rgba(10,10,10,0.08);border-color:#0A0A0A;transform:translateY(-2px)}
+/* Hero override: buttons sit on the yellow hero card (yellow in both themes),
+   so they must stay white in BOTH dark and light. Scoped specifically to
+   .hero so non-hero usages of .btn-primary/.btn-outline are unaffected. */
+.hero .btn-primary,.hero .btn-outline,
+[data-theme="light"] .hero .btn-primary,[data-theme="light"] .hero .btn-outline{color:#FFFFFF;border:1.5px solid rgba(255,255,255,0.6)}
+.hero .btn-primary:hover,.hero .btn-outline:hover,
+[data-theme="light"] .hero .btn-primary:hover,[data-theme="light"] .hero .btn-outline:hover{background:rgba(255,255,255,0.1);border-color:#FFFFFF;transform:translateY(-2px)}
+.btn svg{width:14px;height:14px}
+
+/* (Bees removed in v7 — atmospheric direction shifted away from decoration) */
+
+/* ============================================================
+   SECTIONS BASE
+   V22: vertical rhythm calmed — section pill less loud,
+   gap to title increased, gap to content reduced. Reads more
+   editorial, less product-UI.
+   V31: sections are now independent floating cards on a canvas
+   (the .frame is no longer a visible shell). Default section padding
+   stays generous internally; the card surface, border, and rounding
+   are applied per-section so the major areas read as separated
+   intentional cards.
+   ============================================================ */
+section{padding:104px 56px;position:relative;transition:var(--tc)}
+.s-pill{display:inline-flex;align-items:center;gap:9px;font-family:'Manrope',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;padding:7px 14px;border-radius:9999px;border:1px solid var(--border-card);color:var(--brand-yellow);margin-bottom:32px;background:var(--bg-elevated)}
+.s-pill svg{width:13px;height:13px;color:var(--brand-yellow);flex-shrink:0}
+.s-pill .pill-q{font-family:'Manrope',sans-serif;font-weight:800;font-size:13px;color:var(--brand-yellow);line-height:1}
+[data-theme="light"] .s-pill{border-color:rgba(225,180,20,0.75);color:var(--text-primary)}
+[data-theme="light"] .s-pill svg{color:var(--text-primary)}
+[data-theme="light"] .s-pill .pill-q{color:var(--text-primary)}
+.s-title{font-family:'Manrope',sans-serif;font-weight:800;font-size:clamp(40px,5.5vw,84px);line-height:1.02;letter-spacing:-0.035em;margin-bottom:64px;color:var(--text-primary)}
+.s-title .accent{color:var(--brand-yellow)}
+
+/* ============================================================
+   PHOTO SLOT SYSTEM — image-readiness for hero, cards, about
+   ============================================================ */
+/* Slot wrapper fills its parent. Sits below text/labels by default (z-index:0).
+   When an <img> is present (and not src=""), the placeholder label hides via :has(). */
+.photo-slot{position:absolute;inset:0;overflow:hidden;z-index:0;border-radius:inherit}
+.photo-slot img{display:block;width:100%;height:100%;object-fit:cover;object-position:center center;border-radius:inherit}
+/* 9-position object-position utility grid. Default = center. */
+.photo-slot img.pos-top-left{object-position:left top}
+.photo-slot img.pos-top{object-position:center top}
+.photo-slot img.pos-top-right{object-position:right top}
+.photo-slot img.pos-left{object-position:left center}
+.photo-slot img.pos-center{object-position:center center}
+.photo-slot img.pos-right{object-position:right center}
+.photo-slot img.pos-bottom-left{object-position:left bottom}
+.photo-slot img.pos-bottom{object-position:center bottom}
+.photo-slot img.pos-bottom-right{object-position:right bottom}
+/* Auto-hide placeholder labels/hints when a real image is in the slot.
+   Modern browsers: :has() — Safari 15.4+, Chrome 105+, Firefox 121+. */
+.s-card-photo:has(.photo-slot img[src]:not([src=""])) .s-card-photo-label{display:none}
+.about-photo:has(.photo-slot img[src]:not([src=""])) .about-photo-label{display:none}
+.hero:has(.photo-slot img[src]:not([src=""])) .hero-hint{display:none}
+/* Manual fallback: parent with .has-photo class hides the placeholder regardless. */
+.s-card-photo.has-photo .s-card-photo-label{display:none}
+.about-photo.has-photo .about-photo-label{display:none}
+.hero.has-photo .hero-hint{display:none}
+/* Hero photo slot — sits behind grain + content. When a real image lands,
+   apply a subtle scrim so the yellow atmosphere + white text stay legible. */
+.hero .photo-slot{z-index:0}
+.hero .photo-slot:has(img[src]:not([src=""]))::after,
+.hero.has-photo .photo-slot::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,0.35);pointer-events:none}
+[data-theme="light"] .hero .photo-slot:has(img[src]:not([src=""]))::after,
+[data-theme="light"] .hero.has-photo .photo-slot::after{background:rgba(255,255,255,0.25)}
+
+/* ============================================================
+   SEASONAL
+   V31: removed the yellow ::before bleed and the negative-margin
+   overlap that fused this section into the hero. Seasonal now starts
+   below the hero card as its own standalone floating section.
+   ============================================================ */
+.seasonal{background:var(--bg-card);position:relative;overflow:visible;border:1px solid var(--border-card);border-radius:32px;box-shadow:var(--shadow-card)}
+[data-theme="light"] .seasonal{box-shadow:0 6px 24px rgba(60,40,10,0.06)}
+.seasonal > *{position:relative;z-index:1}
+.seasonal-wrap{overflow:visible;padding:20px 4px 28px}
+.seasonal-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;overflow:visible;scroll-snap-type:none;padding:20px 4px 28px;-ms-overflow-style:none;scrollbar-width:none}
+.seasonal-cards::-webkit-scrollbar{display:none}
+
+/* ============================================================
+   SEASONAL FULL-PHOTO CARD PROTOTYPE
+   ============================================================ */
+.s-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  scroll-snap-align: none;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.55s var(--ease-smooth), box-shadow 0.55s var(--ease-smooth), border-color 0.45s ease;
+  cursor: pointer; /* Affordance for mobile tap-to-expand */
+  border-radius: 12px 64px 16px 48px; /* v2 03 - Editorial Soft Petal */
+  box-shadow: var(--shadow-card);
+  height: 380px;
+}
+.s-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--brand-yellow);
+}
+[data-theme="light"] .s-card {
+  border-color: rgba(60,40,10,0.08);
+}
+
+.s-card .photo-slot { z-index: 0; }
+.s-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.75) 100%);
+  z-index: 1;
+  pointer-events: none;
+  transition: background 0.4s ease;
+}
+.s-card:hover::after, .s-card.expanded::after {
+  background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.85) 100%);
+}
+[data-theme="light"] .s-card::after {
+  background: linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.6) 100%);
+}
+[data-theme="light"] .s-card:hover::after, [data-theme="light"] .s-card.expanded::after {
+  background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%);
+}
+
+.s-card-photo-label {
+  position: absolute;
+  top: 30%;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.8;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.s-card-body {
+  position: relative;
+  z-index: 2;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.s-card-top {
+  display: flex;
+  justify-content: flex-start;
+}
+.s-card-tag {
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 9999px;
+  padding: 6px 14px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1;
+}
+.s-card-tag svg { width: 11px; height: 11px; flex-shrink: 0; }
+.tag-new svg { stroke: var(--lavender); }
+.tag-hot svg { stroke: var(--soft-pink); }
+.tag-fan svg { stroke: var(--mint); }
+
+.s-card-content { margin-top: auto; }
+.s-card-blurb {
+  font-family: 'Manrope', sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--brand-yellow);
+  margin-bottom: 8px;
+  opacity: 0.9;
+}
+.s-card-name {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1.15;
+  color: #ffffff;
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+.s-card-price-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.s-card-price {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: -0.01em;
+  color: #fff;
+}
+.s-card-price .pd { color: var(--brand-yellow); font-size: 15px; margin-right: 1px; font-weight: 600; }
+.s-card-price .pn { color: #fff; }
+
+.s-card-reveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.4s var(--ease-smooth);
+}
+.s-card:hover .s-card-reveal, .s-card.expanded .s-card-reveal { grid-template-rows: 1fr; }
+.s-card-reveal-inner {
+  overflow: hidden;
+  padding-top: 0;
+  transition: padding 0.4s var(--ease-smooth);
+}
+.s-card:hover .s-card-reveal-inner, .s-card.expanded .s-card-reveal-inner { padding-top: 12px; }
+.s-card-desc {
+  font-size: 13.5px;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.55;
+  margin-bottom: 18px;
+}
+.s-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  padding-top: 16px;
+}
+.s-card-size {
+  font-family: 'Manrope', sans-serif;
+  font-size: 11px;
+  color: rgba(255,255,255,0.6);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.s-card-add {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s var(--ease-smooth);
+  flex-shrink: 0;
+  padding: 0;
+}
+.s-card-add svg { width: 14px; height: 14px; stroke-width: 2.5; transition: transform 0.4s var(--ease-smooth); }
+.s-card-add:hover { background: var(--brand-yellow); color: #0A0A0A; border-color: var(--brand-yellow); }
+.s-card-add:hover svg { transform: rotate(90deg); }
+.s-card-add:active { transform: scale(0.94); }
+
+.s-card .m-ctrl { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; }
+.s-card .m-ctrl-qty { color: #fff; }
+.s-card .m-ctrl:hover { background: var(--brand-yellow); color: #0A0A0A; border-color: var(--brand-yellow); }
+
+@media (max-width: 768px) {
+  /* Mobile Seasonal Expand Behavior */
+  .seasonal-wrap{padding:0 4px 4px}
+  .seasonal-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 8px 4px 16px; overflow: visible; scroll-snap-type: none; }
+  .s-card {
+    height: 160px; /* compact collapsed state */
+    border-radius: 12px 32px 12px 24px;
+    flex: none; width: auto; scroll-snap-align: none;
+    transition: height 0.4s var(--ease-smooth), border-radius 0.4s var(--ease-smooth);
+  }
+  .s-card.expanded {
+    grid-column: 1 / -1;
+    height: 250px; /* taller for description/controls */
+  }
+  .s-card-body { padding: 14px; }
+  .s-card-name { 
+    font-size: 16px; 
+    margin-bottom: 4px; 
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .s-card.expanded .s-card-name { -webkit-line-clamp: 3; }
+  .s-card-price { font-size: 16px; }
+  .s-card-price .pd { font-size: 12px; }
+  .s-card-tag { padding: 4px 10px; font-size: 9px; }
+  
+  /* Disable hover state revealing controls on mobile, rely strictly on .expanded */
+  .s-card:not(.expanded):hover .s-card-reveal { grid-template-rows: 0fr; }
+  .s-card:not(.expanded):hover .s-card-reveal-inner { padding-top: 0; }
+  
+  .s-card-desc { font-size: 12px; margin-bottom: 12px; }
+  .s-card-foot { padding-top: 12px; flex-direction: column; align-items: flex-start; gap: 8px; }
+  .s-card-right { display: flex; width: 100%; justify-content: space-between; align-items: center; }
+}
+
+/* ============================================================
+   MENU
+   V31: card surface — soft border, restrained shadow, rounded.
+   ============================================================ */
+.menu{background:var(--bg-card);position:relative;overflow:hidden;border:1px solid var(--border-card);border-radius:32px;box-shadow:var(--shadow-card)}
+[data-theme="light"] .menu{box-shadow:0 6px 24px rgba(60,40,10,0.06)}
+.menu-wallpaper{position:absolute;inset:0;display:flex;flex-direction:column;gap:0;pointer-events:none;user-select:none;overflow:hidden;z-index:0}
+/* V22: background display text dialed back. Should feel like atmosphere,
+   not a second focal layer competing with menu items. */
+.menu-wallpaper-line{font-family:'Manrope',sans-serif;font-weight:700;font-size:clamp(140px,24vw,320px);line-height:0.82;letter-spacing:-0.01em;color:var(--text-primary);opacity:0.028;white-space:nowrap;transform:rotate(-4deg);margin-left:-5%}
+[data-theme="light"] .menu-wallpaper-line{opacity:0.035}
+.menu-wallpaper-line:nth-child(2){margin-left:5%;opacity:0.022}
+.menu-wallpaper-line:nth-child(3){margin-left:-3%;opacity:0.026}
+[data-theme="light"] .menu-wallpaper-line:nth-child(2){opacity:0.028}
+[data-theme="light"] .menu-wallpaper-line:nth-child(3){opacity:0.03}
+@media (max-width:768px){
+  .menu-wallpaper-line{opacity:0.018}
+  .menu-wallpaper-line:nth-child(2){opacity:0.014}
+  .menu-wallpaper-line:nth-child(3){opacity:0.016}
+}
+.menu-inner{position:relative;z-index:1}
+
+/* Editorial inline tabs — text + sliding underline.
+   V31: bg matches the menu card surface (was --bg-primary). */
+.menu-tabs-wrap{position:sticky;top:0;z-index:30;background:var(--bg-card);padding:20px 0 0;margin:0 -56px 44px;padding-left:56px;padding-right:56px;transition:var(--tc);border-bottom:1px solid var(--border-subtle)}
+.menu-tabs{display:flex;gap:32px;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none;position:relative}
+.menu-tabs::-webkit-scrollbar{display:none}
+.menu-tab{background:transparent;border:none;padding:0 0 18px;font-family:'Manrope',sans-serif;font-size:14px;font-weight:600;color:var(--text-tertiary);white-space:nowrap;cursor:pointer;transition:color 0.35s ease;letter-spacing:0.02em;position:relative;flex-shrink:0}
+.menu-tab:hover:not(.on){color:var(--text-secondary)}
+.menu-tab.on{color:var(--text-primary)}
+.menu-tab.on::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--brand-yellow);border-radius:1px;animation:tabIn 0.5s var(--ease-smooth)}
+@keyframes tabIn{from{transform:scaleX(0.3);opacity:0}to{transform:scaleX(1);opacity:1}}
+
+.menu-panel{display:none}
+.menu-panel.on{display:block;animation:slide 0.55s var(--ease-smooth)}
+@keyframes slide{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.m-item{display:flex;align-items:center;justify-content:space-between;padding:24px 0;border-bottom:1px solid var(--border-subtle);gap:20px;transition:padding 0.45s var(--ease-smooth), margin 0.45s var(--ease-smooth), background 0.4s ease, border-radius 0.4s ease;position:relative;cursor:default}
+.m-item:last-child{border-bottom:none}
+.m-item::before{content:'';position:absolute;left:-12px;top:50%;transform:translateY(-50%) scaleY(0);width:3px;height:60%;background:var(--brand-yellow);border-radius:2px;transition:transform 0.3s var(--ease-out);transform-origin:center}
+.m-item:hover{padding-left:16px;padding-right:16px;margin:0 -16px;background:var(--bg-card-hover);border-radius:var(--r-md);border-bottom-color:transparent}
+.m-item:hover::before{transform:translateY(-50%) scaleY(1)}
+.m-item-info{flex:1;min-width:0}
+.m-item-name{font-family:'Manrope',sans-serif;font-size:18px;font-weight:700;color:var(--text-primary);margin-bottom:4px;letter-spacing:-0.015em;line-height:1.2}
+.m-item-desc{font-size:13px;color:var(--text-secondary);line-height:1.5}
+.m-item-sizes{font-family:'Manrope',sans-serif;font-size:11px;color:var(--text-tertiary);margin-top:6px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase}
+.m-item-right{display:flex;align-items:center;gap:14px;flex-shrink:0}
+.m-item-price{font-family:'Manrope',sans-serif;font-size:20px;font-weight:700;white-space:nowrap;letter-spacing:-0.01em}
+.m-item-price .pd{color:var(--brand-yellow);font-size:14px;margin-right:1px;font-weight:600}
+.m-item-price .pn{color:var(--text-primary)}
+/* Plus button for cart */
+.m-add{width:32px;height:32px;border-radius:50%;background:transparent;border:1px solid var(--border-card);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.45s var(--ease-smooth);flex-shrink:0}
+.m-add svg{width:14px;height:14px;stroke-width:2.5;transition:transform 0.45s var(--ease-smooth)}
+.m-add:hover{background:var(--brand-yellow);color:#0A0A0A;border-color:var(--brand-yellow)}
+.m-add:hover svg{transform:rotate(90deg)}
+.m-add:active{transform:scale(0.94)}
+/* Cart item controls — compact - / qty / + stepper that replaces .m-add
+   when an item has been added at least once. Used by both menu items and
+   seasonal cards. No separate remove button; reaching qty 0 via minus
+   swaps back to the single + add button. */
+.m-ctrls{display:inline-flex;align-items:center;gap:6px;flex-shrink:0}
+.m-ctrl{width:28px;height:28px;border-radius:50%;background:transparent;border:1px solid var(--border-card);color:var(--text-secondary);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:background 0.25s ease, color 0.25s ease, border-color 0.25s ease, transform 0.2s var(--ease-smooth);flex-shrink:0;padding:0;font-family:'Manrope',sans-serif;font-weight:700;font-size:14px;line-height:1;-webkit-tap-highlight-color:transparent}
+.m-ctrl svg{width:12px;height:12px;stroke-width:2.6}
+.m-ctrl:hover{background:var(--brand-yellow);color:#0A0A0A;border-color:var(--brand-yellow)}
+.m-ctrl:active{transform:scale(0.92)}
+.m-ctrl-qty{font-family:'Manrope',sans-serif;font-weight:700;font-size:13px;color:var(--text-primary);min-width:18px;text-align:center;letter-spacing:-0.01em;user-select:none}
+
+/* Seasonal card add button — small + sits in the foot row, right side */
+.s-card-add{width:30px;height:30px;border-radius:50%;background:transparent;border:1px solid var(--border-card);color:var(--text-secondary);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all 0.4s var(--ease-smooth);flex-shrink:0;margin-left:10px;padding:0}
+.s-card-add svg{width:13px;height:13px;stroke-width:2.5;transition:transform 0.4s var(--ease-smooth)}
+.s-card-add:hover{background:var(--brand-yellow);color:#0A0A0A;border-color:var(--brand-yellow)}
+.s-card-add:hover svg{transform:rotate(90deg)}
+.s-card-add:active{transform:scale(0.94)}
+
+/* Chip disabled-but-hoverable state: when cart is empty, chips can still
+   show their hover preview on desktop but cannot be selected. Cursor +
+   pointer-events on touch reflect that. The .sel state cannot be applied
+   while .chips-locked is set on the root. */
+[data-chips-locked="1"] .chip{cursor:default}
+@media (hover:none){
+  [data-chips-locked="1"] .chip{pointer-events:none}
+}
+
+/* Add-ons — RESTORED character, V22 calmed.
+   V31: lifted to elevated surface so it contrasts against the new
+   menu card outer. */
+.addons{margin-top:64px;background:var(--bg-elevated);border:1px solid var(--border-card);border-radius:22px;padding:36px 36px 32px;position:relative;overflow:hidden;box-shadow:var(--shadow-card)}
+.addons::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--brand-yellow),var(--soft-pink),var(--lavender),var(--mint));opacity:0.55}
+.addons-title{font-family:'Manrope',sans-serif;font-size:26px;font-weight:800;color:var(--text-primary);margin-bottom:22px;letter-spacing:-0.025em;line-height:1.05}
+.addons-title .accent{color:var(--brand-yellow)}
+.addons-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:26px}
+.addons-prices{display:flex;flex-wrap:wrap;gap:20px;font-size:13px;color:var(--text-secondary);padding-top:22px;border-top:1px solid var(--border-subtle)}
+.addons-prices span strong{color:var(--brand-yellow);font-weight:700;margin-left:2px;font-family:'Manrope',sans-serif}
+
+/* CHIPS — neutral by default, soft rainbow gradient on hover, stronger persistent gradient when SELECTED */
+.chip{position:relative;background:var(--bg-elevated);border:1px solid var(--border-card);border-radius:9999px;padding:7px 14px;font-size:12.5px;color:var(--text-secondary);transition:all 0.4s var(--ease-smooth);cursor:pointer;font-weight:500;user-select:none;-webkit-tap-highlight-color:transparent}
+.chip:hover:not(.sel){color:var(--text-primary);border:1px solid transparent;background-image:linear-gradient(var(--bg-elevated),var(--bg-elevated)),linear-gradient(90deg,rgba(255,232,71,0.78),rgba(242,196,206,0.7),rgba(196,177,212,0.7),rgba(168,216,185,0.7));background-origin:border-box;background-clip:padding-box,border-box;transform:translateY(-1px)}
+.chip.sel{color:var(--text-primary);border:1px solid transparent;background-image:linear-gradient(var(--bg-elevated),var(--bg-elevated)),linear-gradient(90deg,#FFE361,#F2C4CE,#C4B1D4,#A8D8B9);background-origin:border-box;background-clip:padding-box,border-box;transform:translateY(-2px);box-shadow:0 4px 20px rgba(255,232,71,0.3)}
+[data-theme="light"] .chip:hover:not(.sel){background-image:linear-gradient(#FFFFFF,#FFFFFF),linear-gradient(90deg,rgba(255,232,71,0.78),rgba(242,196,206,0.7),rgba(196,177,212,0.7),rgba(168,216,185,0.7))}
+[data-theme="light"] .chip.sel{background-image:linear-gradient(#FFFFFF,#FFFFFF),linear-gradient(90deg,#FFE361,#F2C4CE,#C4B1D4,#A8D8B9)}
+
+/* ============================================================
+   ABOUT
+   V31: card surface — soft border, restrained shadow, rounded.
+   ============================================================ */
+.about{background:var(--bg-card);position:relative;overflow:hidden;border:1px solid var(--border-card);border-radius:32px;box-shadow:var(--shadow-card)}
+[data-theme="light"] .about{box-shadow:0 6px 24px rgba(60,40,10,0.06)}
+.about-grid{display:grid;grid-template-columns:0.9fr 1.1fr;gap:80px;align-items:center;position:relative;z-index:1}
+
+/* ABOUT media stack: wallpaper sits behind the photo card */
+.about-media{
+  position:relative;
+  width:100%;
+  margin-top:-60px;
+  isolation:isolate;
+}
+
+.about-photo-wallpaper{
+  position:absolute;
+  inset:-18% -26%;
+  z-index:0;
+  pointer-events:none;
+  user-select:none;
+  display:flex;
+  justify-content:space-between;
+  align-items:stretch;
+  overflow:hidden;
+}
+
+.about-photo-wallpaper span{
+  font-family:'Manrope',sans-serif;
+  font-weight:800;
+  font-size:clamp(82px,8.5vw,160px);
+  line-height:0.88;
+  letter-spacing:-0.055em;
+  color:var(--text-primary);
+  opacity:0.032;
+  writing-mode:vertical-rl;
+  transform:rotate(180deg);
+  white-space:nowrap;
+}
+
+[data-theme="light"] .about-photo-wallpaper span{
+  color:#1A1815;
+  opacity:0.025;
+}
+
+.about-photo-wallpaper span:nth-child(1){
+  align-self:flex-start;
+  transform:rotate(180deg) translateY(-8%);
+}
+
+.about-photo-wallpaper span:nth-child(2){
+  align-self:flex-end;
+  transform:rotate(180deg) translateY(10%);
+  opacity:0.026;
+}
+
+.about-photo-wallpaper span:nth-child(3){
+  align-self:center;
+  transform:rotate(180deg) translateY(-2%);
+  opacity:0.034;
+}
+
+.about-photo-wallpaper span:nth-child(4){
+  align-self:flex-end;
+  transform:rotate(180deg) translateY(16%);
+  opacity:0.024;
+}
+
+.about-photo{
+  aspect-ratio:4/5;
+  background:linear-gradient(140deg,#FFE361 0%,#E8B520 100%);
+  position:relative;
+  overflow:hidden;
+  box-shadow:var(--shadow-hover);
+  /* V21: nudged toward soft petal silhouette — still clearly rectangular,
+     just more pronounced asymmetric corner softness. Subtle, not blob. */
+  border-radius:96px 32px 96px 32px;
+  z-index:2;
+}
+
+.about-photo-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(0,0,0,0.4);font-weight:700;text-align:center;line-height:1.8;pointer-events:none;z-index:2}
+.about-photo::after{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 1px 1px, rgba(0,0,0,0.08) 1px, transparent 0);background-size:24px 24px;pointer-events:none;z-index:1}
+
+.about-badge{display:inline-flex;align-items:center;gap:8px;background:var(--bg-elevated);border:1px solid var(--border-card);border-radius:9999px;padding:7px 14px;font-family:'Manrope',sans-serif;font-size:11px;font-weight:700;color:var(--brand-yellow);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:24px}
+.about-badge svg{width:13px;height:13px;stroke:var(--brand-yellow);fill:none;stroke-width:1.6}
+[data-theme="light"] .about-badge{border-color:rgba(225,180,20,0.75);color:var(--text-primary)}
+[data-theme="light"] .about-badge svg{stroke:var(--text-primary)}
+.about-heading{font-family:'Manrope',sans-serif;font-weight:800;font-size:clamp(36px,4.4vw,64px);line-height:1.02;letter-spacing:-0.03em;margin-bottom:24px;color:var(--text-primary)}
+.about-heading em{font-style:normal;color:var(--brand-yellow)}
+.about-desc{font-size:16px;line-height:1.7;color:var(--text-secondary);margin-bottom:32px;max-width:520px}
+
+/* ============================================================
+   REVIEWS
+   V22: cards refined — softer border, calmer scatter, more breathing.
+   V31: outer section now reads as a floating card.
+   ============================================================ */
+.reviews{background:var(--bg-card);position:relative;overflow:hidden;border:1px solid var(--border-card);border-radius:32px;box-shadow:var(--shadow-card)}
+[data-theme="light"] .reviews{box-shadow:0 6px 24px rgba(60,40,10,0.06)}
+.reviews::after{content:'';position:absolute;bottom:0;right:0;width:520px;height:520px;background:radial-gradient(ellipse,rgba(242,196,206,0.04) 0%,transparent 70%);pointer-events:none}
+.r-carousel{position:relative}
+.r-track{display:flex;gap:24px;transition:transform 0.55s var(--ease-out);will-change:transform}
+.r-card{flex:0 0 calc(33.333% - 16px);min-width:300px;background:var(--bg-elevated);border:1px solid var(--border-card);border-radius:22px;padding:32px;transition:transform 0.55s var(--ease-smooth), box-shadow 0.55s var(--ease-smooth), border-color 0.45s ease;cursor:default;position:relative;box-shadow:var(--shadow-card)}
+.r-card:nth-child(2){transform:translateY(-8px)}
+.r-card:nth-child(4){transform:translateY(-6px)}
+.r-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-hover)}
+.r-card:nth-child(2):hover{transform:translateY(-12px)}
+.r-card:nth-child(4):hover{transform:translateY(-10px)}
+.r-name{font-family:'Manrope',sans-serif;font-weight:800;font-size:22px;color:var(--text-primary);margin-bottom:10px;letter-spacing:-0.02em;line-height:1.15}
+.r-stars{display:flex;gap:2px;margin-bottom:16px;color:var(--brand-yellow)}
+.r-stars svg{width:15px;height:15px;fill:currentColor}
+.r-text{font-size:14.5px;line-height:1.65;color:var(--text-secondary)}
+.r-controls{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:48px}
+.r-nav{width:42px;height:42px;border-radius:50%;background:var(--bg-elevated);border:1px solid var(--border-card);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);transition:all 0.25s var(--ease-spring)}
+.r-nav:hover:not(:disabled){background:var(--brand-yellow);color:#0A0A0A;border-color:var(--brand-yellow);transform:scale(1.08)}
+.r-nav:disabled{opacity:0.3;cursor:not-allowed}
+.r-nav svg{width:16px;height:16px}
+.r-dots{display:flex;gap:6px;align-items:center}
+.r-dot{height:8px;border-radius:4px;background:var(--border-card);border:none;cursor:pointer;transition:all 0.3s var(--ease-spring);padding:0;width:8px}
+.r-dot.on{width:24px;background:var(--brand-yellow)}
+
+/* ============================================================
+   FAQ — wrapped in subtle card surface
+   V22: dropped heavy yellow border + glow in favor of restraint.
+   Matches Zest reference where FAQ rows are surrounded by one
+   calm container, not a glowing rectangle.
+   V31: outer section now reads as a floating card.
+   ============================================================ */
+.faq{background:var(--bg-card);border:1px solid var(--border-card);border-radius:32px;box-shadow:var(--shadow-card)}
+[data-theme="light"] .faq{box-shadow:0 6px 24px rgba(60,40,10,0.06)}
+.faq-list{max-width:820px;background:var(--bg-elevated);border:1px solid var(--border-yellow-soft);border-radius:22px;padding:6px 30px;box-shadow:var(--shadow-card)}
+.faq-item{border-bottom:1px solid var(--border-yellow-soft);overflow:hidden}
+.faq-item:last-child{border-bottom:none}
+.faq-q{width:100%;background:transparent;border:none;cursor:pointer;text-align:left;padding:26px 0;display:flex;align-items:center;justify-content:space-between;gap:20px;font-family:'Manrope',sans-serif;font-size:18px;font-weight:700;color:var(--text-primary);letter-spacing:-0.015em;line-height:1.35}
+.faq-icon{width:32px;height:32px;border-radius:50%;border:1px solid var(--border-yellow-soft);background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text-secondary);transition:all 0.5s var(--ease-smooth)}
+.faq-icon svg{width:14px;height:14px;transition:transform 0.5s var(--ease-smooth)}
+.faq-item.open .faq-icon{background:var(--brand-yellow);border-color:var(--brand-yellow);color:#0A0A0A;box-shadow:0 0 18px var(--brand-yellow-glow-strong)}
+.faq-item.open .faq-icon svg{transform:rotate(45deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height 0.45s var(--ease-out), padding 0.3s;font-size:14.5px;color:var(--text-secondary);line-height:1.7}
+.faq-item.open .faq-a{max-height:260px;padding-bottom:26px}
+
+/* ============================================================
+   GALLERY BAND — editorial strip between reviews and FAQ
+   V22: more breathing, calmer spacing.
+   V31: outer section now reads as a floating card.
+   ============================================================ */
+.gallery{background:var(--bg-card);padding:96px 72px;position:relative;overflow:hidden;border:1px solid var(--border-card);border-radius:32px;box-shadow:var(--shadow-card)}
+[data-theme="light"] .gallery{box-shadow:0 6px 24px rgba(60,40,10,0.06)}
+.gallery-head{display:flex;align-items:baseline;justify-content:space-between;gap:24px;margin-bottom:44px;flex-wrap:wrap}
+.gallery-title{font-family:'Manrope',sans-serif;font-weight:800;font-size:clamp(28px,3.4vw,44px);line-height:1.05;letter-spacing:-0.025em;color:var(--text-primary);margin:0}
+.gallery-title .accent{color:var(--brand-yellow)}
+.gallery-sub{font-size:14px;color:var(--text-secondary);max-width:340px;line-height:1.55;margin:0}
+.gallery-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px;align-items:stretch}
+.gallery-tile{position:relative;aspect-ratio:4/5;background:linear-gradient(135deg,var(--bg-elevated) 0%,var(--bg-card-hover) 100%);border:1px solid var(--border-card);overflow:hidden;transition:transform 0.55s var(--ease-smooth), box-shadow 0.55s var(--ease-smooth), border-color 0.45s ease;box-shadow:var(--shadow-card)}
+.gallery-tile:hover{transform:translateY(-4px);box-shadow:var(--shadow-hover);border-color:var(--brand-yellow-glow)}
+/* Alternating shape language — echoes about-photo squircle, mirrored per tile.
+   Aspect ratios share 4/5 so all three tiles align in height; only widths vary. */
+.gallery-tile:nth-child(1){border-radius:64px 22px 64px 22px}
+.gallery-tile:nth-child(2){border-radius:22px 64px 22px 64px}
+.gallery-tile:nth-child(3){border-radius:64px 22px 64px 22px}
+/* Default placeholder gradient for tiles 2 and 3 (text/atmosphere) */
+.gallery-tile:nth-child(2){background:linear-gradient(135deg,var(--lavender) 0%,var(--soft-pink) 100%)}
+.gallery-tile:nth-child(3){background:linear-gradient(135deg,#D4A574 0%,#8B5E3C 100%)}
+[data-theme="light"] .gallery-tile{box-shadow:0 2px 16px rgba(0,0,0,0.05)}
+.gallery-tile-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(0,0,0,0.45);font-weight:700;text-align:center;line-height:1.8;pointer-events:none;padding:24px}
+[data-theme="dark"] .gallery-tile:nth-child(1) .gallery-tile-label{color:rgba(255,255,255,0.35)}
+/* Caption chip — bottom-left corner, only visible when an image is present */
+.gallery-tile-caption{position:absolute;left:14px;bottom:14px;background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#FFFFFF;font-family:'Manrope',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:6px 12px;border-radius:9999px;z-index:2;opacity:0;transition:opacity 0.3s ease;pointer-events:none}
+.gallery-tile:has(.photo-slot img[src]:not([src=""])) .gallery-tile-caption{opacity:1}
+.gallery-tile.has-photo .gallery-tile-caption{opacity:1}
+/* Auto-hide tile label when an image is present */
+.gallery-tile:has(.photo-slot img[src]:not([src=""])) .gallery-tile-label{display:none}
+.gallery-tile.has-photo .gallery-tile-label{display:none}
+
+/* ============================================================
+   TICKER
+   V22: subtle "sun-hit" sheen across top edge.
+   V24: rebuilt to a ZEST-style band — solid black background in
+   BOTH themes, soft yellow border, white text + white bee glyphs,
+   larger type. The old sheen overlays were tied to a yellow surface;
+   stripped here because they don't read on black.
+   ============================================================ */
+/* TICKER - floating dark band across the page (V24, both themes) */
+.ticker-section{padding:0;background:transparent}
+.ticker{background:#000000;overflow:hidden;border-radius:22px;border:1px solid rgba(255,232,71,0.14);box-shadow:0 12px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);--ticker-fg:#FFFFFF;position:relative;isolation:isolate}
+.ticker::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 50%), linear-gradient(90deg, rgba(255,255,255,0.12) 0%, transparent 12%, transparent 88%, rgba(255,255,255,0.12) 100%);pointer-events:none;z-index:4}
+.ticker::after{content:'';position:absolute;bottom:-1px;left:20%;right:20%;height:1px;background:linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);box-shadow:0 -2px 14px rgba(255,255,255,0.25);pointer-events:none;z-index:2}
+[data-theme="light"] .ticker{background:#0A0A0A;border:1px solid rgba(255,232,71,0.25);box-shadow:0 12px 32px rgba(60,40,10,0.15), 0 0 0 1px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.06);--ticker-fg:#FFFFFF}
+[data-theme="light"] .ticker::before{background:linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 50%), linear-gradient(90deg, rgba(255,255,255,0.15) 0%, transparent 12%, transparent 88%, rgba(255,255,255,0.15) 100%)}
+[data-theme="light"] .ticker::after{background:linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);box-shadow:0 -2px 14px rgba(255,255,255,0.3)}
+/* Side-fade mask: ends fade to the ticker's black bg, not transparent,
+   so the scrolling phrases dissolve cleanly into the band's own surface. */
+.ticker-track{display:flex;padding:24px 0;position:relative;z-index:3;-webkit-mask-image:linear-gradient(to right, transparent 0%, #000 12%, #000 88%, transparent 100%);mask-image:linear-gradient(to right, transparent 0%, #000 12%, #000 88%, transparent 100%)}
+/* v37: translate3d + will-change + backface-visibility promote the
+   strip to its own compositor layer so the loop seam doesn't flicker
+   at every cycle. The animation runs from translate3d(0,0,0) to
+   translate3d(-50%,0,0); the JS duplicates phrases exactly so the
+   strip's second half is an identical copy of the first and the
+   wrap is seamless. */
+.ticker-inner{display:flex;white-space:nowrap;animation:scroll 35s linear infinite;will-change:transform;backface-visibility:hidden;-webkit-backface-visibility:hidden;transform:translate3d(0,0,0)}
+.ticker-item{display:inline-flex;align-items:center;gap:36px;padding:0 40px;font-family:'Bungee',sans-serif;font-weight:400;font-size:clamp(24px,3.5vw,40px);color:rgba(255,255,255,0.55);-webkit-text-stroke:0;letter-spacing:0.04em;line-height:1;text-transform:uppercase;transition:all 0.3s ease}
+.ticker:hover .ticker-item{color:rgba(255,255,255,0.85);-webkit-text-stroke:0.5px rgba(255,255,255,0.2)}
+.ticker-bee{display:inline-flex;align-items:center;justify-content:center;width:clamp(36px,4.5vw,48px);height:clamp(36px,4.5vw,48px);background:transparent;border:none;border-radius:50%;animation:spin 16s linear infinite;transition:all 0.3s ease;overflow:hidden;padding:0;flex-shrink:0}
+.ticker:hover .ticker-bee{transform:none}
+.ticker-bee img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
+@keyframes scroll{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
+
+/* ============================================================
+   FOOTER
+   V22: more breathing, refined hierarchy, integrated with ticker
+   above so the bottom of the site feels finished, not abandoned.
+   V31: footer is its own floating card.
+   ============================================================ */
+.footer{background:var(--bg-card);padding:84px 56px 40px;transition:var(--tc);position:relative;border:1px solid var(--border-card);border-radius:32px;box-shadow:var(--shadow-card)}
+[data-theme="light"] .footer{box-shadow:0 6px 24px rgba(60,40,10,0.06)}
+/* Hairline top edge for soft separation from the ticker section above */
+.footer::before{content:'';position:absolute;top:0;left:56px;right:56px;height:1px;background:linear-gradient(to right, transparent 0%, var(--border-subtle) 20%, var(--border-subtle) 80%, transparent 100%);pointer-events:none}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:64px;margin-bottom:64px}
+.footer-brand-col{display:flex;flex-direction:column}
+.footer-brand{font-family:'Manrope',sans-serif;font-weight:800;font-size:30px;color:var(--brand-yellow);margin-bottom:14px;letter-spacing:-0.03em;line-height:1.05}
+.footer-tag{font-size:14px;color:var(--text-secondary);line-height:1.65;margin-bottom:28px;max-width:340px}
+.footer-pills{display:flex;flex-direction:column;gap:10px;align-items:flex-start;margin-top:6px}
+.footer-pill{display:inline-flex;align-items:center;gap:10px;background:var(--bg-elevated);border:1px solid var(--border-card);border-radius:9999px;padding:9px 16px;font-size:13px;font-weight:600;color:var(--text-primary);text-decoration:none;transition:all 0.25s var(--ease-spring)}
+.footer-pill:hover{transform:translateY(-2px)}
+.footer-pill svg{width:16px;height:16px}
+.footer-pill-ig-mobile{display:none}
+.footer-col-title{font-family:'Manrope',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:20px}
+.footer-links{list-style:none;display:flex;flex-direction:column;gap:12px}
+.footer-links a{font-size:14px;color:var(--text-secondary);text-decoration:none;transition:color 0.18s;cursor:pointer}
+.footer-links a:hover{color:var(--brand-yellow)}
+.footer-info-block{font-size:14px;color:var(--text-secondary);line-height:1.6;margin-bottom:16px}
+.footer-info-block strong{display:block;color:var(--text-primary);font-weight:600;margin-bottom:3px;font-size:12.5px;letter-spacing:0.02em}
+.footer-right-col{display:flex;flex-direction:column}
+.footer-follow{margin-bottom:32px}
+.footer-follow .footer-col-title{margin-bottom:14px}
+.footer-ig-icon{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;background:var(--bg-elevated);border:1px solid var(--border-card);color:var(--text-primary);text-decoration:none;transition:transform 0.25s var(--ease-spring)}
+.footer-ig-icon:hover{transform:translateY(-2px)}
+.footer-ig-icon svg{width:18px;height:18px}
+.footer-bottom{border-top:1px solid var(--border-subtle);padding-top:28px;display:flex;align-items:center;justify-content:space-between;font-size:12.5px;color:var(--text-tertiary)}
+.footer-mark{display:flex;align-items:center;gap:8px}
+.footer-mark svg{width:14px;height:14px}
+
+/* ============================================================
+   CONTACT VIEW
+   V31: contact-hero and contact-section are now their own floating
+   cards, matching the section-card architecture of the main view.
+   ============================================================ */
+.contact-hero{padding:80px 56px 48px;position:relative;background:var(--bg-card);border:1px solid var(--border-card);border-radius:32px;box-shadow:var(--shadow-card)}
+[data-theme="light"] .contact-hero{box-shadow:0 6px 24px rgba(60,40,10,0.06)}
+.contact-h{font-family:'Manrope',sans-serif;font-weight:800;font-size:clamp(52px,7vw,108px);line-height:0.98;letter-spacing:-0.035em;color:var(--text-primary);margin-bottom:14px}
+.contact-h .accent{color:var(--brand-yellow)}
+.contact-sub{font-size:17px;color:var(--text-secondary);max-width:540px;line-height:1.55}
+.contact-section{padding:88px 56px 80px;background:var(--bg-card);border:1px solid var(--border-card);border-radius:32px;box-shadow:var(--shadow-card)}
+[data-theme="light"] .contact-section{box-shadow:0 6px 24px rgba(60,40,10,0.06)}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-bottom:64px}
+.contact-col-title{display:inline-flex;align-items:center;gap:8px;font-family:'Manrope',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;padding:7px 14px;border-radius:9999px;border:1px solid var(--border-yellow-soft);color:var(--text-secondary);margin-bottom:24px;background:var(--bg-elevated)}
+.contact-col-title svg{width:13px;height:13px;color:var(--brand-yellow)}
+.contact-box{background:var(--bg-elevated);border:1px solid var(--border-yellow-soft);border-radius:20px;padding:24px;margin-bottom:14px;display:flex;align-items:center;gap:18px;min-height:88px;transition:all 0.25s var(--ease-out);box-shadow:var(--shadow-card)}
+.contact-box:hover{background:var(--bg-card-hover);box-shadow:0 8px 28px rgba(0,0,0,0.18)}
+[data-theme="light"] .contact-box:hover{box-shadow:0 8px 24px rgba(60,40,10,0.07)}
+.contact-box-icon{width:44px;height:44px;border-radius:12px;background:var(--brand-yellow-dim);border:1px solid var(--border-yellow);display:flex;align-items:center;justify-content:center;color:var(--brand-yellow);flex-shrink:0}
+.contact-box-icon svg{width:20px;height:20px}
+.contact-box-content{flex:1;min-width:0}
+.contact-box-label{font-family:'Manrope',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:4px}
+.contact-box-value{font-family:'Manrope',sans-serif;font-size:17px;font-weight:700;color:var(--text-primary);line-height:1.3;letter-spacing:-0.015em}
+.contact-box-value a{color:inherit;text-decoration:none}
+.contact-box-value a:hover{color:var(--brand-yellow)}
+a[href^="tel"],
+a[x-apple-data-detectors]{
+  color:inherit !important;
+  text-decoration:none !important;
+  -webkit-text-fill-color:currentColor;
+}
+
+.contact-box-value a[href^="tel"]{
+  color:var(--brand-yellow) !important;
+  -webkit-text-fill-color:var(--brand-yellow);
+}
+/* Contact form */
+.contact-form{display:flex;flex-direction:column;gap:14px}
+.form-row{display:grid;grid-template-columns:1fr;gap:14px}
+.form-row-2{grid-template-columns:1fr 1fr}
+.field{display:flex;flex-direction:column;gap:6px}
+.field-label{font-family:'Manrope',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-tertiary)}
+.field-input,.field-textarea{background:var(--bg-elevated);border:1px solid var(--border-yellow-soft);border-radius:14px;padding:16px 18px;font-family:'Manrope',sans-serif;font-size:14px;color:var(--text-primary);transition:border-color 0.2s, background 0.2s;width:100%;min-height:60px}
+.field-textarea{min-height:204px;resize:vertical;font-family:'Manrope',sans-serif;line-height:1.55}
+.field-input:focus,.field-textarea:focus{outline:none;border-color:var(--brand-yellow);background:var(--bg-card-hover);box-shadow:0 0 0 3px var(--brand-yellow-glow-strong)}
+.field-input::placeholder,.field-textarea::placeholder{color:var(--text-tertiary)}
+.form-submit{background:var(--brand-yellow);color:#0A0A0A;border:none;border-radius:16px;padding:18px 32px;font-family:'Manrope',sans-serif;font-size:14px;font-weight:700;letter-spacing:0.04em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform 0.25s var(--ease-spring), box-shadow 0.25s;margin-top:8px;width:100%}
+.form-submit:hover{transform:translateY(-2px);box-shadow:0 8px 28px var(--brand-yellow-glow-strong)}
+.form-submit svg{width:14px;height:14px}
+
+/* Map placeholder — squircle */
+/* Map — the map itself IS the card. The outer .contact-map-card is just a
+   layout wrapper that keeps it aligned with the other Contact cards;
+   it has no border, no background, no shadow, no padding, so the user
+   sees a single card (not a card-in-card). */
+.contact-map-card{background:transparent;border:0;border-radius:0;box-shadow:none;padding:0;position:relative;overflow:visible}
+[data-theme="light"] .contact-map-card{box-shadow:none}
+.contact-map{background:linear-gradient(135deg,#1a2530 0%,#0f1922 50%,#1a2530 100%);border:1px solid var(--border-card);border-radius:32px;height:480px;position:relative;overflow:hidden;margin-bottom:0;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-card)}
+[data-theme="light"] .contact-map{background:linear-gradient(135deg,#E8E0D0 0%,#F0E5D0 50%,#E8E0D0 100%);box-shadow:0 6px 24px rgba(60,40,10,0.06)}
+.contact-map::before{content:'';position:absolute;inset:0;background-image:linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px);background-size:40px 40px}
+[data-theme="light"] .contact-map::before{background-image:linear-gradient(to right, rgba(0,0,0,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.06) 1px, transparent 1px)}
+.map-pin{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:12px}
+.map-pin-icon{width:64px;height:64px;border-radius:50%;background:var(--brand-yellow);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px var(--brand-yellow-glow-strong);animation:pinPulse 2.4s ease-in-out infinite}
+.map-pin-icon svg{width:28px;height:28px;color:#0A0A0A}
+.map-pin-label{font-family:'Manrope',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-secondary);background:var(--bg-card);border:1px solid var(--border-card);border-radius:9999px;padding:6px 14px}
+@keyframes pinPulse{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+/* ============================================================
+   REVEAL — staggered cascade
+   ============================================================ */
+.r{opacity:0;transform:translateY(24px);transition:opacity 1s var(--ease-smooth), transform 1s var(--ease-smooth)}
+.r.v{opacity:1;transform:translateY(0)}
+.rd1{transition-delay:0.1s}.rd2{transition-delay:0.2s}.rd3{transition-delay:0.3s}.rd4{transition-delay:0.4s}.rd5{transition-delay:0.5s}.rd6{transition-delay:0.6s}
+
+/* Scrollbar — hide native; custom overlay below */
+::-webkit-scrollbar{width:0;height:0;background:transparent}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:transparent}
+
+/* Custom overlay scroll indicator */
+.scroll-rail{position:fixed;top:24px;right:8px;bottom:24px;width:2px;z-index:80;pointer-events:none;opacity:0;transition:opacity 0.5s ease}
+.scroll-rail.active{opacity:1}
+.scroll-thumb{position:absolute;left:0;right:0;background:linear-gradient(180deg,var(--brand-yellow) 0%,var(--brand-yellow) 100%);border-radius:999px;box-shadow:0 0 8px rgba(255,232,71,0.22);min-height:28px;transition:top 0.08s ease-out}
+
+/* Contact page reviews track — proper overflow handling */
+/* Contact page reviews — editorial floating fragments on both desktop and mobile.
+   Mobile overrides below tighten widths/rotations to the tighter viewport. */
+.contact-reviews-stack{display:flex;flex-direction:column;gap:28px;padding-top:12px;padding-bottom:8px;max-width:880px;margin:0 auto}
+.contact-r-card{
+  background:var(--bg-elevated);
+  border:1px solid var(--border-subtle);
+  border-radius:22px;
+  padding:22px 28px;
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px 18px;
+  box-shadow:0 8px 28px rgba(0,0,0,0.20), 0 0 0 1px var(--border-subtle) inset, 0 0 36px var(--brand-yellow-dim);
+  transition:transform 0.45s var(--ease-smooth), box-shadow 0.45s var(--ease-smooth), border-color 0.4s ease;
+  position:relative;
+}
+[data-theme="light"] .contact-r-card{
+  box-shadow:0 8px 28px rgba(60,40,10,0.07), 0 0 0 1px var(--border-subtle) inset, 0 0 30px var(--brand-yellow-dim);
+}
+.contact-r-card:hover{transform:translateY(-3px) rotate(0deg);box-shadow:0 12px 36px rgba(0,0,0,0.24)}
+.contact-r-card .r-name{font-family:'Manrope',sans-serif;font-weight:800;font-size:19px;color:var(--text-primary);letter-spacing:-0.015em;line-height:1.15;margin:0}
+.contact-r-card .r-stars{display:flex;gap:2px;color:var(--brand-yellow);margin:0;flex-shrink:0}
+.contact-r-card .r-stars svg{width:15px;height:15px;fill:currentColor}
+.contact-r-line{flex-basis:100%;margin:0;font-family:'Manrope',sans-serif;font-size:14px;line-height:1.5;color:var(--text-secondary);letter-spacing:0.005em}
+/* Desktop staggered placement — varied widths, soft offsets, micro-rotation */
+.contact-r-card.pos-l{align-self:flex-start;max-width:62%;margin-left:2%;transform:rotate(-0.8deg)}
+.contact-r-card.pos-r{align-self:flex-end;max-width:58%;margin-right:2%;transform:rotate(1deg)}
+.contact-reviews-stack > .contact-r-card:nth-child(3){transform:rotate(-0.4deg)}
+.contact-reviews-stack > .contact-r-card:nth-child(4){transform:rotate(0.6deg)}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width:768px){
+  .sidebar{display:none}
+  .m-nav{display:flex}
+  .page{padding:80px 12px 12px}
+  /* V31: section card gap tightens on mobile so the floating cards
+     don't read as cramped stacked boxes with too much empty between. */
+  .view.on{gap:16px}
+  /* V31: section cards have smaller rounding on mobile so they sit
+     comfortably inside the narrower viewport. */
+  .hero,.seasonal,.menu,.about,.reviews,.gallery,.faq,.footer,.contact-hero,.contact-section{border-radius:24px}
+  section{padding:80px 24px}
+  .hero{padding:60px 28px;min-height:calc(100vh - 92px)}
+  .menu-tabs-wrap{padding-left:24px;padding-right:24px;margin:0 -24px 28px}
+  .menu-tabs{gap:24px}
+  .about-grid{grid-template-columns:1fr;gap:48px}
+  .about-media{
+  margin-top:0;
+}
+
+.about-photo{
+  aspect-ratio:5/4;
+  border-radius:64px 22px 64px 22px;
+}
+
+.about-photo-wallpaper{
+  inset:-20% -24%;
+}
+
+.about-photo-wallpaper span{
+  font-size:clamp(58px,15vw,96px);
+}
+
+  .ticker-section{padding:0}
+  .ticker-track{padding:16px 0}
+  .ticker-item{font-size:20px;gap:24px;padding:0 24px;-webkit-text-stroke:0.5px rgba(255,255,255,0.1)}
+  .ticker-bee{width:28px;height:28px}
+  /* Gallery: swipe-style row on mobile, snap per tile */
+  .gallery{padding:64px 24px}
+  .gallery-head{margin-bottom:24px;gap:14px}
+  .gallery-sub{font-size:13px}
+  .gallery-grid{display:flex;grid-template-columns:none;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;-ms-overflow-style:none;scrollbar-width:none;margin:0;padding:4px 8px 16px 4px}
+  .gallery-grid::-webkit-scrollbar{display:none}
+  .gallery-tile{flex:0 0 78%;scroll-snap-align:start;aspect-ratio:4/5 !important}
+  .gallery-tile:nth-child(1),
+  .gallery-tile:nth-child(3){border-radius:48px 18px 48px 18px}
+  .gallery-tile:nth-child(2){border-radius:18px 48px 18px 48px}
+  .r-card{flex:0 0 calc(100% - 32px);min-width:0}
+  .r-track{padding:0 16px}
+  .r-card:nth-child(2),.r-card:nth-child(4){transform:translateY(0)}
+  .footer-grid{grid-template-columns:1fr;gap:36px}
+  .footer{padding:48px 24px 28px}
+  .footer-bottom{flex-direction:column;gap:14px;text-align:center}
+  .footer-pill-ig-mobile{display:inline-flex}
+  .footer-follow{display:none}
+  /* Contact mobile refinement — lighter, more breathing room */
+  .contact-hero{padding:56px 24px 24px}
+  .contact-section{padding:56px 24px 80px}
+  .contact-grid{grid-template-columns:1fr;gap:56px;margin-bottom:56px}
+  .contact-col-title{margin-bottom:24px}
+  .contact-box{border:1px solid var(--border-yellow-soft);box-shadow:none;padding:20px;margin-bottom:10px;min-height:72px;gap:14px}
+  .contact-box:hover{background:var(--bg-card);box-shadow:0 6px 18px rgba(0,0,0,0.18)}
+  .contact-box-icon{width:38px;height:38px;border-radius:10px}
+  .contact-box-icon svg{width:17px;height:17px}
+  .contact-box-label{font-size:10px;margin-bottom:3px}
+  .contact-box-value{font-size:15px}
+  .form-row-2{grid-template-columns:1fr;gap:14px}
+  .field-input,.field-textarea{padding:14px 16px;font-size:14px}
+  .field-textarea{min-height:160px}
+  .form-submit{padding:16px 28px;margin-top:14px}
+  .contact-map-card{padding:0;border-radius:0;margin-bottom:0;background:transparent;border:0;box-shadow:none}
+  .contact-map{height:280px;border-radius:24px;margin-bottom:0}
+  /* Mobile contact reviews — floating editorial fragments, not stacked rectangles.
+     Soft shadows replace hard borders; widths and offsets vary per card; tiny rotations. */
+  .contact-reviews-stack{gap:30px;padding-top:14px;padding-bottom:8px}
+  .contact-r-card{flex-direction:column;align-items:flex-start;gap:8px;padding:18px 22px;border-radius:22px;
+    background:var(--bg-elevated);
+    border:1px solid var(--border-subtle);
+    box-shadow:0 6px 24px rgba(0,0,0,0.18), 0 0 0 1px var(--border-subtle) inset, 0 0 32px var(--brand-yellow-dim)}
+  [data-theme="light"] .contact-r-card{
+    background:var(--bg-elevated);
+    box-shadow:0 6px 24px rgba(0,0,0,0.06), 0 0 28px var(--brand-yellow-dim)}
+  .contact-r-card .r-name{font-size:16px}
+  .contact-r-card .r-stars svg{width:13px;height:13px}
+  .contact-r-line{font-size:13px;line-height:1.4}
+  /* Per-card placement: alternating sides, varied widths, micro-rotation */
+  .contact-r-card.pos-l{align-self:flex-start;margin-left:4px;max-width:76%;transform:rotate(-1deg)}
+  .contact-r-card.pos-r{align-self:flex-end;margin-right:4px;max-width:70%;transform:rotate(1.2deg)}
+  /* Card 3 and 4 mobile tilts */
+  .contact-reviews-stack > .contact-r-card:nth-child(3){max-width:80%;margin-left:18px;transform:rotate(-0.4deg)}
+  .contact-reviews-stack > .contact-r-card:nth-child(4){max-width:78%;margin-right:18px;transform:rotate(0.6deg)}
+  /* Hover: settle straight + lift, brighter shadow */
+  .contact-r-card:hover{transform:translateY(-2px) rotate(0deg);box-shadow:0 10px 32px rgba(0,0,0,0.22)}
+  .cart-fab{bottom:calc(16px + env(safe-area-inset-bottom, 0px));right:16px;width:52px;height:52px}
+  .scroll-rail{right:6px;top:80px;width:2px}
+}
+@media (min-width:769px) and (max-width:1024px){
+  .about-grid{gap:48px}
+  .r-card{flex:0 0 calc(50% - 12px)}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ SIDEBAR ============ -->
+<nav class="sidebar" aria-label="Main">
+  <button class="s-logo" onclick="goView('main','hero')" aria-label="Home">
+    <img src="logo.jpg" alt="The Flower Shop Coffee Co.">
+  </button>
+  <div class="s-icons">
+    <button class="s-btn on" data-nav="hero" onclick="goView('main','hero')" data-tip="Home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+    </button>
+    <button class="s-btn" data-nav="menu" onclick="goView('main','menu')" data-tip="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+    </button>
+    <button class="s-btn" data-nav="about" onclick="goView('main','about')" data-tip="About">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    </button>
+    <button class="s-btn" data-nav="contact" onclick="goView('contact')" data-tip="Contact">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    </button>
+  </div>
+  <button class="s-theme" onclick="theme()" aria-label="Theme">
+    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M6.34 17.66l-1.41 1.41"/><path d="M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</nav>
+
+<!-- ============ MOBILE NAV ============ -->
+<nav class="m-nav" aria-label="Mobile">
+  <button class="m-logo" onclick="goView('main','hero')">
+    <img src="logo.jpg" alt="The Flower Shop Coffee Co.">
+  </button>
+  <div class="m-icons">
+    <button class="m-btn on" data-nav="hero" onclick="goView('main','hero')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></button>
+    <button class="m-btn" data-nav="menu" onclick="goView('main','menu')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></button>
+    <button class="m-btn" data-nav="about" onclick="goView('main','about')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></button>
+    <button class="m-btn" data-nav="contact" onclick="goView('contact')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></button>
+  </div>
+  <button class="m-theme" onclick="theme()">
+    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M6.34 17.66l-1.41 1.41"/><path d="M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</nav>
+
+<div class="page">
+<div class="frame">
+
+<!-- ============================================================
+     MAIN VIEW
+     ============================================================ -->
+<div class="view on" id="view-main">
+
+<!-- ====== HERO ====== -->
+<section class="hero" id="hero">
+  <div class="photo-slot" data-image-slot="hero" aria-hidden="true">
+    <img src="raspmatcha__1__hero.jpg" alt="Raspberry-crumble matcha latte against a yellow wall" class="pos-center">
+  </div>
+  <div class="hero-grain" aria-hidden="true"></div>
+  <span class="hero-hint">PHOTO PLACEHOLDER · Truck exterior or drink shot</span>
+
+  <div class="hero-content">
+    <h1 class="hero-brand pre">The Flower Shop</h1>
+    <p class="hero-tagline pre">Playful brews, timeless flavors.</p>
+    <div class="hero-buttons">
+      <button class="btn btn-primary" onclick="goView('main','menu')">
+        Order Now
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg>
+      </button>
+      <button class="btn btn-outline" onclick="goView('main','menu')">View Menu</button>
+    </div>
+  </div>
+</section>
+
+<!-- ====== SEASONAL ====== -->
+<section class="seasonal" id="seasonal">
+  <div class="r"><div class="s-pill">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+    Limited Time
+  </div></div>
+  <h2 class="s-title r rd1">Spring sips,<br><span class="accent">freshly poured.</span></h2>
+
+  <div class="seasonal-wrap">
+  <div class="seasonal-cards">
+    <div class="s-card r rd1" style="background:linear-gradient(135deg, var(--lavender) 0%, var(--soft-pink) 100%)" onclick="toggleCard(this, event)">
+      <div class="photo-slot" data-image-slot="seasonal-bluebonnet" aria-hidden="true"><img src="bluebonnet1.jpg" alt="Bluebonnet field under Texas sky" class="pos-center"></div>
+      <p class="s-card-photo-label">DRINK PHOTO<br>Instagram shot</p>
+      <div class="s-card-body">
+        <div class="s-card-top">
+          <span class="s-card-tag tag-new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>New</span>
+        </div>
+        <div class="s-card-content">
+          <p class="s-card-name">Bluebonnet Nectar</p>
+          <div class="s-card-price-row">
+            <span class="s-card-price"><span class="pd">$</span><span class="pn">5+</span></span>
+          </div>
+          <div class="s-card-reveal">
+            <div class="s-card-reveal-inner">
+              <p class="s-card-desc">Mildly sweet, like a blueberry donut.</p>
+              <div class="s-card-foot">
+                <span class="s-card-size">M / L</span>
+                <span class="s-card-right"><button class="s-card-add" data-name="Bluebonnet Nectar" onclick="event.stopPropagation(); addCart(this)" aria-label="Add Bluebonnet Nectar to cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="s-card r rd2" style="background:linear-gradient(165deg, var(--bg-elevated) 0%, var(--brand-yellow-dim) 100%)" onclick="toggleCard(this, event)">
+      <div class="photo-slot" data-image-slot="seasonal-baklava" aria-hidden="true"><img src="baklavaespresso2.jpg" alt="Baklava oat shaken espresso, iced" class="pos-center"></div>
+      <p class="s-card-photo-label">DRINK PHOTO<br>Instagram shot</p>
+      <div class="s-card-body">
+        <div class="s-card-top">
+          <span class="s-card-tag tag-hot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 11-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg>Hot</span>
+        </div>
+        <div class="s-card-content">
+          <p class="s-card-blurb">Limited Edition</p>
+          <p class="s-card-name">Baklava Oat Shaken Espresso</p>
+          <div class="s-card-price-row">
+            <span class="s-card-price"><span class="pd">$</span><span class="pn">6+</span></span>
+          </div>
+          <div class="s-card-reveal">
+            <div class="s-card-reveal-inner">
+              <p class="s-card-desc">Toasty pistachio with honey-pastry notes.</p>
+              <div class="s-card-foot">
+                <span class="s-card-size">M / L · Iced</span>
+                <span class="s-card-right"><button class="s-card-add" data-name="Baklava Oat Shaken Espresso" onclick="event.stopPropagation(); addCart(this)" aria-label="Add Baklava Oat Shaken Espresso to cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="s-card r rd3" style="background:linear-gradient(135deg, var(--cream) 0%, var(--brand-yellow) 100%)" onclick="toggleCard(this, event)">
+      <div class="photo-slot" data-image-slot="seasonal-banana" aria-hidden="true"><img src="bananajam1.jpg" alt="Banana toast with iced banana jam latte" class="pos-top-right"></div>
+      <p class="s-card-photo-label" style="color:rgba(0,0,0,0.6)">DRINK PHOTO<br>Instagram shot</p>
+      <div class="s-card-body">
+        <div class="s-card-top">
+          <span class="s-card-tag tag-fan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Fan Fave</span>
+        </div>
+        <div class="s-card-content">
+          <p class="s-card-blurb">Returning Favorite</p>
+          <p class="s-card-name">Banana Jam Latte</p>
+          <div class="s-card-price-row">
+            <span class="s-card-price"><span class="pd">$</span><span class="pn">5+</span></span>
+          </div>
+          <div class="s-card-reveal">
+            <div class="s-card-reveal-inner">
+              <p class="s-card-desc">Made to taste like fresh-baked banana bread. Warm, comforting, a little nostalgic.</p>
+              <div class="s-card-foot">
+                <span class="s-card-size">M / L</span>
+                <span class="s-card-right"><button class="s-card-add" data-name="Banana Jam Latte" onclick="event.stopPropagation(); addCart(this)" aria-label="Add Banana Jam Latte to cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="s-card r rd4" style="background:linear-gradient(135deg, var(--lavender) 0%, var(--mint) 100%)" onclick="toggleCard(this, event)">
+      <div class="photo-slot" data-image-slot="seasonal-earl-grey" aria-hidden="true"><img src="bluebonnet2.jpg" alt="Bluebonnet close-up at golden hour" class="pos-center"></div>
+      <p class="s-card-photo-label">DRINK PHOTO<br>Instagram shot</p>
+      <div class="s-card-body">
+        <div class="s-card-top">
+          <span class="s-card-tag tag-new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>New</span>
+        </div>
+        <div class="s-card-content">
+          <p class="s-card-name">Bluebonnet Iced Earl Grey</p>
+          <div class="s-card-price-row">
+            <span class="s-card-price"><span class="pd">$</span><span class="pn">4.50+</span></span>
+          </div>
+          <div class="s-card-reveal">
+            <div class="s-card-reveal-inner">
+              <div class="s-card-foot">
+                <span class="s-card-size">M / L</span>
+                <span class="s-card-right"><button class="s-card-add" data-name="Bluebonnet Iced Earl Grey" onclick="event.stopPropagation(); addCart(this)" aria-label="Add Bluebonnet Iced Earl Grey to cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+</section>
+
+<!-- ====== MENU ====== -->
+<section class="menu" id="menu">
+  <div class="menu-wallpaper" aria-hidden="true">
+    <span class="menu-wallpaper-line">COFFEE COFFEE COFFEE</span>
+    <span class="menu-wallpaper-line">COFFEE COFFEE COFFEE</span>
+    <span class="menu-wallpaper-line">COFFEE COFFEE COFFEE</span>
+  </div>
+  <div class="menu-inner">
+    <div class="r"><div class="s-pill">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+      Full Menu
+    </div></div>
+    <h2 class="s-title r rd1">What we're<br><span class="accent">serving.</span></h2>
+
+    <div class="menu-tabs-wrap r rd2">
+      <div class="menu-tabs">
+        <button class="menu-tab on" onclick="tab(this,'specialty')">Specialty</button>
+        <button class="menu-tab" onclick="tab(this,'espresso')">Espresso</button>
+        <button class="menu-tab" onclick="tab(this,'coffee')">Coffee</button>
+        <button class="menu-tab" onclick="tab(this,'tea')">Tea</button>
+        <button class="menu-tab" onclick="tab(this,'notcoffee')">Not Coffee</button>
+        <button class="menu-tab" onclick="tab(this,'retail')">Retail</button>
+      </div>
+    </div>
+
+    <div class="r rd3">
+      <!-- SPECIALTY -->
+      <div class="menu-panel on" id="p-specialty">
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Golden Graham Dirty Chai</p><p class="m-item-desc">Chai tea latte with a shot of espresso and toasty honey cereal flavor</p><p class="m-item-sizes">Hot M/L · Iced M/L</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">5+</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Pecan Pie Latte</p><p class="m-item-desc">Latte to remind you of grammy's pecan pie</p><p class="m-item-sizes">Hot M/L · Iced M/L</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">4.50+</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Cardamom Mocha Bloom</p><p class="m-item-desc">Decadent dark mocha with cardamom &amp; subtle notes of rose</p><p class="m-item-sizes">Hot M/L · Iced M/L</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">5+</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">S'mores Latte</p><p class="m-item-desc">Toasty mallow, chocolate, and graham</p><p class="m-item-sizes">Hot M/L · Iced M/L</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">5+</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Iced Oat Shaken Espresso</p><p class="m-item-desc">Choose: agave sea salt · brown sugar · caramel sea salt</p><p class="m-item-sizes">Iced M/L</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">6+</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Ube Agave Matcha</p><p class="m-item-desc">Earthy, nutty &amp; subtly sweet with ube cold foam</p><p class="m-item-sizes">M / L</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">5+</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Strawberry Foam Matcha Latte</p><p class="m-item-desc">Delicious matcha latte with vanilla and topped with strawberry cold foam, reminiscent of vanilla cereal milk</p><p class="m-item-sizes">Iced M/L</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">5+</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Italian Soda</p><p class="m-item-desc">Choose: strawberry · blue razz · blood orange · peach</p><p class="m-item-sizes">M / L</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">3+</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Frappe</p><p class="m-item-desc">Get creative — any of our flavors</p><p class="m-item-sizes">M / L</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">4.50+</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+      </div>
+
+      <!-- ESPRESSO -->
+      <div class="menu-panel" id="p-espresso">
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Latte</p><p class="m-item-desc">Espresso with steamed milk</p><p class="m-item-sizes">Hot S/M/L · Iced M/L</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">3.50+</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Cappuccino</p><p class="m-item-desc">Espresso, steamed milk, thick foam</p><p class="m-item-sizes">Hot S/M/L</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">3.50+</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Mocha</p><p class="m-item-desc">Espresso with chocolate and steamed milk</p><p class="m-item-sizes">Hot S/M/L · Iced M/L</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">4+</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Flat White</p><p class="m-item-desc">Ristretto shots with microfoam</p><p class="m-item-sizes">Hot S/M/L</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">3.50+</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Cortado</p><p class="m-item-desc">Equal parts espresso and warm milk</p><p class="m-item-sizes">Hot S/M</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">3+</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Macchiato</p><p class="m-item-desc">Espresso marked with a dollop of foam</p><p class="m-item-sizes">Hot S</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">3</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Americano</p><p class="m-item-desc">Espresso diluted with hot water</p><p class="m-item-sizes">Hot S/M/L · Iced M/L</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">3.50+</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Double Espresso</p><p class="m-item-desc">Pure, clean, concentrated</p><p class="m-item-sizes">Hot S</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">3</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+      </div>
+
+      <!-- COFFEE -->
+      <div class="menu-panel" id="p-coffee">
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Drip Coffee</p><p class="m-item-desc">Single-origin rotating selection</p><p class="m-item-sizes">S/M/L</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">2.50+</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Café au Lait</p><p class="m-item-desc">Drip coffee with steamed milk</p><p class="m-item-sizes">S/M/L</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">3+</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Cold Brew</p><p class="m-item-desc">House cold brew concentrate over ice</p><p class="m-item-sizes">Iced M/L</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">5+</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+      </div>
+
+      <!-- TEA -->
+      <div class="menu-panel" id="p-tea">
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Unsweetened Matcha Latte</p><p class="m-item-sizes">Hot S/M/L · Iced M/L</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">3+</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Chai Latte</p><p class="m-item-sizes">Hot S/M/L · Iced M/L</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">3.50+</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">London Fog</p><p class="m-item-sizes">Hot S/M/L</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">3.50+</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Tea Latte</p><p class="m-item-sizes">Hot S/M/L</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">3+</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Loose Leaf Tea</p><p class="m-item-sizes">Hot S/M/L · Iced M/L</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">2.50+</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+      </div>
+
+      <!-- NOT COFFEE -->
+      <div class="menu-panel" id="p-notcoffee">
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Hot Cocoa</p><p class="m-item-desc">Rich and velvety</p><p class="m-item-sizes">S/M/L</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">3+</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Steamer</p><p class="m-item-desc">Steamed milk with your choice of add-ins</p><p class="m-item-sizes">S/M/L</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">2.50+</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Flavored Milk</p><p class="m-item-desc">Chocolate, Strawberry, Vanilla</p><p class="m-item-sizes">M / L</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">3.50+</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+      </div>
+
+      <!-- RETAIL -->
+      <div class="menu-panel" id="p-retail">
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Del Rey Espresso Blend</p><p class="m-item-desc">Dominican &amp; Honduran · notes of chocolate, orange, hazelnut</p><p class="m-item-sizes">12 oz</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">21</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">Papua New Guinea</p><p class="m-item-desc">Single origin · notes of vanilla bean, cinnamon, dark chocolate, elderberry</p><p class="m-item-sizes">12 oz</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">23</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+        <div class="m-item"><div class="m-item-info"><p class="m-item-name">El Salvador</p><p class="m-item-desc">Single origin · notes of tropical fruits, milk chocolate, English toffee</p><p class="m-item-sizes">12 oz</p></div><div class="m-item-right"><p class="m-item-price"><span class="pd">$</span><span class="pn">20</span></p><button class="m-add" onclick="addCart(this)" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+      </div>
+
+      <!-- ADD-ONS — hidden for now; reintegrate as per-item options in cart flow -->
+      <div class="addons r rd4" style="display:none">
+        <p class="addons-title">Flavors &amp; <span class="accent">add-ins.</span></p>
+        <div class="addons-grid">
+          <span class="chip">Vanilla (SF)</span><span class="chip">Hazelnut (SF)</span><span class="chip">Praline</span><span class="chip">Mocha</span><span class="chip">Caramel</span><span class="chip">Brown Sugar</span><span class="chip">Lavender</span><span class="chip">Ube</span><span class="chip">Marshmallow</span><span class="chip">Strawberry (SF)</span><span class="chip">Honey</span><span class="chip">Agave</span><span class="chip">Stevia</span><span class="chip">Cinnamon</span><span class="chip">Sea Salt</span>
+        </div>
+        <div class="addons-prices">
+          <span>Extra shot<strong> +$1.50</strong></span>
+          <span>Oat/Almond<strong> +$1</strong></span>
+          <span>Syrups<strong> +50¢</strong></span>
+          <span>Whip<strong> +50¢</strong></span>
+          <span>Cold foam<strong> +50¢</strong></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== ABOUT ====== -->
+<section class="about" id="about">
+  <div class="about-grid">
+  <div class="about-media r">
+    <div class="about-photo-wallpaper" aria-hidden="true">
+      <span>FLOWER SHOP</span>
+      <span>FLOWER SHOP</span>
+      <span>FLOWER SHOP</span>
+      <span>FLOWER SHOP</span>
+    </div>
+
+    <div class="about-photo">
+      <div class="photo-slot" data-image-slot="about" aria-hidden="true">
+        <img src="IMG_2031.jpeg" alt="The owners standing in front of the yellow Flower Shop Coffee Co. truck" class="pos-right">
+      </div>
+      <p class="about-photo-label">PHOTO PLACEHOLDER<br>Yellow truck exterior /<br>owner in window</p>
+    </div>
+  </div>
+    <div>
+      <div class="r">
+        <div class="about-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg>
+          Featured in Dallas Observer
+        </div>
+        <h2 class="about-heading">A small truck<br>with <em>big flavor.</em></h2>
+        <p class="about-desc">Tucked behind a gas station on Fort Worth Drive, we serve quality coffee and tea with rotating seasonal specials, fresh flavors, and cream toppings that make every drink feel handcrafted.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== REVIEWS ====== -->
+<section class="reviews" id="reviews">
+  <div class="r"><div class="s-pill">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+    Reviews
+  </div></div>
+  <h2 class="s-title r rd1">Real cups,<br><span class="accent">real love.</span></h2>
+
+  <div class="r-carousel r rd2">
+    <div class="r-track" id="rTrack">
+      <div class="r-card"><p class="r-name">Joshua G.</p><div class="r-stars"><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg></div><p class="r-text">Don't let the unassuming location fool you — one of the best coffee places in Denton. Everything is brewed fresh to order and the owner takes pride in what she makes. Pricing is extremely fair. I take everyone who visits me here.</p></div>
+      <div class="r-card"><p class="r-name">Karen B.</p><div class="r-stars"><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg></div><p class="r-text">Wanted to try this place for a while and finally made it — wow, what a delicious surprise. The s'mores iced latte was fantastic. Not too sweet, not too strong. Most shops over-sweeten to cover bitter coffee. Not the case here.</p></div>
+      <div class="r-card"><p class="r-name">Stacie M.</p><div class="r-stars"><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg></div><p class="r-text">Tried the iced oatmilk shaken espresso. It was perfect and served with the sweetest smile. Exactly what I wanted. Definitely worth stopping by.</p></div>
+      <div class="r-card"><p class="r-name">Robin R.</p><div class="r-stars"><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg></div><p class="r-text">Absolutely the best coffee around. Iced caramel macchiato with cold foam. The prices are great. When you ask for an extra shot, you get it. Bye bye Starbucks.</p></div>
+      <div class="r-card"><p class="r-name">Sophia L.</p><div class="r-stars"><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg></div><p class="r-text">This might be one of my favorite coffee stops I've ever had. Not only is the truck super cute, but everything I've gotten here has been top notch. If this truck is on your way, highly recommend pulling over.</p></div>
+      <div class="r-card"><p class="r-name">Chris &amp; Michelle M.</p><div class="r-stars"><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg></div><p class="r-text">Delicious and service was amazing. We will be back. Got an iced dirty chai, the pecan pie latte (OMG) and a peppermint mocha. Flavors were great. Everyone was happy and caffeinated.</p></div>
+      <div class="r-card"><p class="r-name">Juanita W.</p><div class="r-stars"><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg></div><p class="r-text">The cutest coffee mobile around. Not only is the setup absolutely charming, but the coffee is top-notch. You can really taste the quality of the ingredients — fresh, flavorful, and perfectly crafted.</p></div>
+    </div>
+    <div class="r-controls">
+      <button class="r-nav" id="rPrev" aria-label="Previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,18 9,12 15,6"/></svg></button>
+      <div class="r-dots" id="rDots"></div>
+      <button class="r-nav" id="rNext" aria-label="Next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,18 15,12 9,6"/></svg></button>
+    </div>
+  </div>
+</section>
+
+<!-- ====== GALLERY BAND ====== -->
+<section class="gallery" id="gallery" aria-label="Gallery">
+  <div class="r"><div class="gallery-head">
+    <h2 class="gallery-title">Inside the <span class="accent">window.</span></h2>
+    <p class="gallery-sub">Drinks, the truck, and the people behind the espresso machine — a few favorite frames.</p>
+  </div></div>
+  <div class="gallery-grid r rd1">
+    <div class="gallery-tile">
+      <div class="photo-slot" data-image-slot="gallery-1" aria-hidden="true">
+        <img src="IMG_2032.jpeg" alt="Owner Miranda smiling from the truck window with a finished drink" class="pos-center">
+      </div>
+      <p class="gallery-tile-label">PHOTO PLACEHOLDER<br>Wide shot / truck exterior</p>
+      <span class="gallery-tile-caption">At the Window</span>
+    </div>
+    <div class="gallery-tile">
+      <div class="photo-slot" data-image-slot="gallery-2" aria-hidden="true">
+        <img src="mochacropped.jpg" alt="Iced mocha with cocoa-dusted cream top against a yellow wall" class="pos-center">
+      </div>
+      <p class="gallery-tile-label">PHOTO PLACEHOLDER<br>Drink close-up<br>or cream pour</p>
+      <span class="gallery-tile-caption">In the Cup</span>
+    </div>
+    <div class="gallery-tile">
+      <div class="photo-slot" data-image-slot="gallery-3" aria-hidden="true">
+        <img src="teaspill.jpg" alt="Iced tea with foam, beside the shop's tea list menu" class="pos-center">
+      </div>
+      <p class="gallery-tile-label">PHOTO PLACEHOLDER<br>Behind the window<br>or barista hands</p>
+      <span class="gallery-tile-caption">Tea Time</span>
+    </div>
+  </div>
+</section>
+
+<!-- ====== FAQ ====== -->
+<section class="faq" id="faq">
+  <div class="r"><div class="s-pill"><span class="pill-q">?</span> FAQ</div></div>
+  <h2 class="s-title r rd1">Got questions?</h2>
+  <div class="faq-list">
+    <div class="faq-item r"><button class="faq-q" onclick="faq(this)">Where are you located?<span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button><div class="faq-a"><p>We're at 2803 Fort Worth Dr in Denton, tucked behind the gas station — look for the bright yellow truck. (Yes, the Dallas Observer wasn't kidding about the gas station part.)</p></div></div>
+    <div class="faq-item r rd1"><button class="faq-q" onclick="faq(this)">Where do your beans come from?<span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button><div class="faq-a"><p>They're roasted by Coffee Del Rey out of Plano, TX — small-batch and rotating. Origins change throughout the year (recently a single-origin from Papua New Guinea). Retail bags are usually available at the truck if you want to brew at home.</p></div></div>
+    <div class="faq-item r rd2"><button class="faq-q" onclick="faq(this)">Can I order ahead online?<span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button><div class="faq-a"><p>Yes — build your order on the menu page and we'll have it ready when you pull up. Online ordering runs during business hours.</p></div></div>
+    <div class="faq-item r rd3"><button class="faq-q" onclick="faq(this)">Do you have dairy-free options?<span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button><div class="faq-a"><p>Of course. Oat and almond milk are available as substitutions (+$1), and several syrups come sugar-free. Just ask at the window — we'll figure it out together.</p></div></div>
+    <div class="faq-item r rd4"><button class="faq-q" onclick="faq(this)">What's the seasonal menu?<span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button><div class="faq-a"><p>We rotate specials every few months. Right now Spring Sips are live: Bluebonnet Nectar, Baklava Oat Shaken Espresso, Banana Jam Latte, and Bluebonnet Iced Earl Grey. New drops always land on Instagram first.</p></div></div>
+  </div>
+</section>
+
+<!-- ====== TICKER (floating card) ====== -->
+<div class="ticker-section">
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track"><div class="ticker-inner" id="ticker"></div></div>
+  </div>
+</div>
+
+<!-- ====== FOOTER ====== -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand-col">
+      <p class="footer-brand">The Flower Shop Coffee Co</p>
+      <p class="footer-tag">Quality coffee &amp; tea, brewed with care from a little yellow truck on Fort Worth Drive in Denton, Texas.</p>
+      <div class="footer-pills">
+        <a class="footer-pill" href="https://maps.google.com/?q=2803+Fort+Worth+Dr,+Denton,+TX+76205" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Find Us
+        </a>
+        <a class="footer-pill" href="tel:+19403316421">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          Call Us
+        </a>
+        <a class="footer-pill footer-pill-ig-mobile" href="https://instagram.com/theflowershopcoffeeco" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          Follow
+        </a>
+      </div>
+    </div>
+    <div>
+      <p class="footer-col-title">Navigate</p>
+      <ul class="footer-links">
+        <li><a onclick="goView('main','seasonal')">Seasonal</a></li>
+        <li><a onclick="goView('main','menu')">Menu</a></li>
+        <li><a onclick="goView('main','about')">About</a></li>
+        <li><a onclick="goView('main','reviews')">Reviews</a></li>
+        <li><a onclick="goView('contact')">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-right-col">
+      <div class="footer-follow">
+        <p class="footer-col-title">Follow Us</p>
+        <a class="footer-ig-icon" href="https://instagram.com/theflowershopcoffeeco" target="_blank" rel="noopener" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        </a>
+      </div>
+      <p class="footer-col-title">Hours</p>
+      <div class="footer-info-block">Tues–Fri 7am–3pm<br>Sat 8am–2pm</div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; 2026 The Flower Shop Coffee Co. All rights reserved.</span>
+    <div class="footer-mark">
+      <span>Made by benji.</span>
+    </div>
+  </div>
+</footer>
+
+</div><!-- /view-main -->
+
+<!-- ============================================================
+     CONTACT VIEW
+     ============================================================ -->
+<div class="view" id="view-contact">
+  <div class="contact-hero">
+    <div class="r"><div class="s-pill">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      Contact
+    </div></div>
+    <h1 class="contact-h r rd1">Let's <span class="accent">connect.</span></h1>
+    <p class="contact-sub r rd2">Catering, press, partnership, or just want to say hi — we'd love to hear from you.</p>
+  </div>
+
+  <div class="contact-section">
+    <div class="contact-grid">
+      <!-- DETAILS -->
+      <div>
+        <div class="r"><div class="contact-col-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          Contact Details
+        </div></div>
+        <div class="r rd1"><div class="contact-box">
+          <div class="contact-box-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+          <div class="contact-box-content"><div class="contact-box-label">Phone</div><div class="contact-box-value"><a href="tel:+19403316421">(940) 331-6421</a></div></div>
+        </div></div>
+        <div class="r rd2"><div class="contact-box">
+          <div class="contact-box-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+          <div class="contact-box-content"><div class="contact-box-label">Email</div><div class="contact-box-value"><a href="mailto:hello@theflowershopcoffee.co">hello@theflowershopcoffee.co</a></div></div>
+        </div></div>
+        <div class="r rd3"><div class="contact-box">
+          <div class="contact-box-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          <div class="contact-box-content"><div class="contact-box-label">Address</div><div class="contact-box-value">2803 Fort Worth Dr,<br>Denton, TX 76205</div></div>
+        </div></div>
+      </div>
+
+      <!-- FORM -->
+      <div>
+        <div class="r"><div class="contact-col-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Contact Form
+        </div></div>
+        <form class="contact-form r rd1" onsubmit="submitForm(event)">
+          <div class="form-row">
+            <div class="field">
+              <label class="field-label" for="cf-name">Name</label>
+              <input class="field-input" id="cf-name" type="text" placeholder="Your name" required>
+            </div>
+          </div>
+          <div class="form-row form-row-2">
+            <div class="field">
+              <label class="field-label" for="cf-phone">Phone</label>
+              <input class="field-input" id="cf-phone" type="tel" placeholder="(555) 555-5555">
+            </div>
+            <div class="field">
+              <label class="field-label" for="cf-email">Email</label>
+              <input class="field-input" id="cf-email" type="email" placeholder="you@email.com" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label class="field-label" for="cf-msg">Message</label>
+              <textarea class="field-textarea" id="cf-msg" placeholder="Tell us what's on your mind..." required></textarea>
+            </div>
+          </div>
+          <button type="submit" class="form-submit">
+            Submit
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAP — own full-width floating card -->
+  <div class="contact-map-card">
+    <div class="r"><div class="contact-map">
+      <div class="map-pin">
+        <div class="map-pin-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <span class="map-pin-label">Google Maps embed</span>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- Reuse FAQ -->
+  <section class="faq">
+    <div class="r"><div class="s-pill"><span class="pill-q">?</span> FAQ</div></div>
+    <h2 class="s-title r rd1">Got questions?</h2>
+    <div class="faq-list">
+      <div class="faq-item r"><button class="faq-q" onclick="faq(this)">Where are you located?<span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button><div class="faq-a"><p>2803 Fort Worth Dr, Denton — the bright yellow truck behind the gas station. If you're using GPS, it'll get you most of the way; the truck does the rest.</p></div></div>
+      <div class="faq-item r rd1"><button class="faq-q" onclick="faq(this)">Do you cater events?<span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button><div class="faq-a"><p>Yes! Weddings, corporate events, private parties — send a note through the form above or give us a call and we'll work out the details.</p></div></div>
+      <div class="faq-item r rd2"><button class="faq-q" onclick="faq(this)">How do I reach you fastest?<span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button><div class="faq-a"><p>Instagram DMs (@theflowershopcoffeeco) get checked daily. For catering or press, the form or a phone call is best.</p></div></div>
+    </div>
+  </section>
+
+  <!-- Reuse Reviews (mini) -->
+  <section class="reviews">
+    <div class="r"><div class="s-pill">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      Reviews
+    </div></div>
+    <div class="contact-reviews-stack r rd1">
+      <div class="contact-r-card pos-l"><p class="r-name">Chloe J.</p><div class="r-stars"><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg></div><p class="contact-r-line">Best coffee in the Denton area!</p></div>
+      <div class="contact-r-card pos-r"><p class="r-name">Juanita W.</p><div class="r-stars"><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg></div><p class="contact-r-line">Must visit for any coffee lover!</p></div>
+      <div class="contact-r-card pos-l"><p class="r-name">Lissette A.</p><div class="r-stars"><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg></div><p class="contact-r-line">The best coffee and matcha I've ever had! Highly recommend.</p></div>
+      <div class="contact-r-card pos-r"><p class="r-name">Kaitlyn A.</p><div class="r-stars"><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg></div><p class="contact-r-line">Our new favorite stop!</p></div>
+    </div>
+  </section>
+
+  <!-- Floating ticker at bottom of contact view -->
+  <div class="ticker-section">
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker-track"><div class="ticker-inner" id="ticker-contact"></div></div>
+    </div>
+  </div>
+
+</div><!-- /view-contact -->
+
+</div><!-- /frame -->
+</div><!-- /page -->
+
+<!-- Cart FAB -->
+<button class="cart-fab" id="cartFab" aria-label="Cart">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+  <span class="cart-count" id="cartCount">0</span>
+</button>
+
+<!-- Floating overlay scroll rail -->
+<div class="scroll-rail" id="scrollRail" aria-hidden="true">
+  <div class="scroll-thumb" id="scrollThumb"></div>
+</div>
+
+<script>
+// ============ REFRESH / RELOAD HARD RESET ============
+// On every full load (and Safari bfcache restore via pageshow), snap
+// scroll to the very top BEFORE any boot-animation work runs. The hero's
+// .pre veil keeps the title/tagline invisible, the boot veil (set on
+// <html> in the head-level inline script) keeps the frame/nav/scroll-rail
+// hidden, and the page body hasn't been painted at a non-zero offset by
+// this script — so the reset is silent.
+try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch(_){}
+// Immediate reset at parse time.
+window.scrollTo(0, 0);
+// Safari bfcache: pageshow with persisted=true means the page was
+// resurrected from cache at the old scroll position; force top again
+// and re-paint the boot veil so the soft fade replays.
+window.addEventListener('pageshow', function(e){
+  if(e.persisted){
+    window.scrollTo(0,0);
+    document.documentElement.classList.remove('boot-fading');
+    document.documentElement.classList.add('booting');
+  }
+});
+// Belt-and-braces: some browsers re-apply restored scroll after this
+// script runs but before paint. A trailing reset on the next frame
+// catches that without ever being visible.
+requestAnimationFrame(function(){ window.scrollTo(0,0); });
+
+// ============ HERO TYPOGRAPHY REVEAL ============
+// Split text into per-char/per-word spans with --i set inline; CSS handles
+// the staggered cadence via animation-delay calc() on each .ch / .w.
+// Replay: toggle .no-anim on .hero, force reflow, drop class on next rAF.
+function splitHeroBrand(){
+  const el=document.querySelector('.hero-brand');
+  if(!el || el.dataset.split) return;
+  const html=el.innerHTML;
+  const parts=html.split(/<br\s*\/?>/i);
+  let out='';
+  let chIndex=0;
+  parts.forEach((line,li)=>{
+    if(li>0) out+='<br>';
+    const words=line.split(/(\s+)/);
+    words.forEach(token=>{
+      if(/^\s+$/.test(token)){
+        out+=`<span class="ch sp" style="--i:${chIndex++}">&nbsp;</span>`;
+      } else if(token.length){
+        out+='<span class="word">';
+        for(const ch of token){
+          out+=`<span class="ch" style="--i:${chIndex++}">${ch}</span>`;
+        }
+        out+='</span>';
+      }
+    });
+  });
+  el.innerHTML=out;
+  // v40: publish char count to .hero so .hero-tagline and .hero-buttons
+  // can compute their cascaded animation-delay relative to the headline.
+  const hero=el.closest('.hero');
+  if(hero) hero.style.setProperty('--ch-count', chIndex);
+  el.dataset.split='1';
+}
+function splitHeroTagline(){
+  const el=document.querySelector('.hero-tagline');
+  if(!el || el.dataset.split) return;
+  const words=el.textContent.trim().split(/\s+/);
+  // V25: join with '' (no whitespace text nodes between spans).
+  // Spacing is preserved by `.hero-tagline .w { margin-right: 0.28em }`.
+  // The old `.join(' ')` created literal space text nodes between inline-
+  // blocks whose computed widths drifted during the filter:blur transition
+  // in Chrome, causing visible word-gap jitter. Stripping them removes
+  // the variable and lets margin-right do the spacing deterministically.
+  // v40: --i set inline per word so CSS can compute staggered animation-delay.
+  el.innerHTML=words.map((w,i)=>`<span class="w" style="--i:${i}">${w}</span>`).join('');
+  // v40: publish word count to .hero for .hero-buttons delay calculation.
+  const hero=el.closest('.hero');
+  if(hero) hero.style.setProperty('--w-count', words.length);
+  el.dataset.split='1';
+}
+
+// v40: route-transition pre-boot reset. Adds .no-anim to .hero so when the
+// view fades back in, the chars/words are at their base CSS state (opacity:0,
+// translateY, blur) — animations are frozen until playHeroReveal removes
+// .no-anim and they re-fire from the first keyframe.
+function resetHeroToPreBoot(){
+  splitHeroBrand();
+  splitHeroTagline();
+  const hero=document.querySelector('.hero');
+  if(!hero) return;
+  hero.classList.add('no-anim');
+  // Force a layout flush so the no-anim state is committed before the
+  // view-fade brings the hero back into view.
+  void hero.offsetWidth;
+}
+
+// v40: hero reveal — pure CSS animations triggered by toggling .no-anim.
+// Replaces ~80 lines of JS coordination from v39. All timing values now
+// live in CSS custom properties at :root (see --hero-* vars near .hero-brand).
+// Works for initial boot (html.booting freeze is removed by bootHero just
+// before this runs) and for replays (theme toggle, view return).
+function playHeroReveal(){
+  splitHeroBrand();
+  splitHeroTagline();
+  const hero=document.querySelector('.hero');
+  const brand=document.querySelector('.hero-brand');
+  const tagline=document.querySelector('.hero-tagline');
+  if(!hero) return;
+  // Freeze any in-flight animation from a prior run.
+  hero.classList.add('no-anim');
+  // Lift the per-element pre-split veil now that the spans exist.
+  if(brand) brand.classList.remove('pre');
+  if(tagline) tagline.classList.remove('pre');
+  // Force a reflow to commit the no-anim + .pre-removed state.
+  void hero.offsetWidth;
+  // Next frame: drop no-anim → animations re-apply, delays count from now.
+  requestAnimationFrame(()=>hero.classList.remove('no-anim'));
+}
+
+// Split immediately at script execution — the chars/words are already opacity:0
+// in CSS, and the .pre class hides the parent until split completes. This means
+// no raw-text frame is ever visible on full refresh.
+splitHeroBrand();
+splitHeroTagline();
+
+// Single boot guard — only fires once per page load. Subsequent triggers
+// (view-switch, theme toggle) call playHeroReveal directly.
+let _heroBooted = false;
+function bootHero(){
+  if(_heroBooted) return;
+  _heroBooted = true;
+  // Final guarantees before the veil lifts: scroll at top, Home active.
+  window.scrollTo(0, 0);
+  document.querySelectorAll('.s-btn, .m-btn').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('[data-nav="hero"]').forEach(b=>b.classList.add('on'));
+  // Lift the boot veil with a soft fade — swap .booting for .boot-fading,
+  // then drop the fading class once the fade completes so the page settles
+  // into its normal state. The hero reveal plays in parallel underneath.
+  const html = document.documentElement;
+  html.classList.remove('booting');
+  html.classList.add('boot-fading');
+  setTimeout(()=>{ html.classList.remove('boot-fading'); }, 500);
+  playHeroReveal();
+}
+
+// ============ THEME ============
+// Mobile browser chrome (Safari address bar pill, Android status bar) reads
+// <meta name="theme-color">. The static media-query versions sync to the OS
+// preference, not our internal data-theme, so they can lag after a manual
+// toggle. We keep the static media-query metas in <head> (good defaults)
+// and additionally maintain a dynamic, non-media-scoped <meta name="theme-color">
+// that follows our data-theme attribute exactly.
+// v37: syncThemeColor now updates EVERY meta[name="theme-color"] (including
+// the two static media-scoped ones), not only the dynamic non-scoped tag.
+// Reason: iOS sometimes samples a media-scoped meta whose content no longer
+// matches the active theme, which is what produces the brief light/dark
+// rectangle behind the address-bar pill. Forcing all metas to the target
+// color removes any conflicting stale value to sample.
+// theme() itself: install .theme-switching to suppress background-color
+// transitions on html/body/.m-nav layers, sync the theme-color metas
+// synchronously, flip data-theme, force inline html/body backgrounds so
+// they snap on the same frame, then clear the inline backgrounds and
+// remove .theme-switching after two rAFs so the rest of the page resumes
+// its normal soft cross-fade.
+function syncThemeColor(){
+  try {
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    const color = isLight ? '#FBF8F2' : '#000000';
+    // 1) Dynamic, non-media-scoped meta — the canonical one we control.
+    let dyn = document.querySelector('meta[name="theme-color"][data-dynamic="1"]');
+    if (!dyn) {
+      dyn = document.createElement('meta');
+      dyn.setAttribute('name', 'theme-color');
+      dyn.setAttribute('data-dynamic', '1');
+      document.head.appendChild(dyn);
+    }
+    if (dyn.getAttribute('content') !== color) {
+      dyn.setAttribute('content', color);
+    }
+    // 2) Every other theme-color meta (the two static media-scoped ones
+    // from <head>) — force them to the same target color so iOS has no
+    // conflicting stale value to sample for the address-bar pill tint.
+    const metas = document.querySelectorAll('meta[name="theme-color"]');
+    metas.forEach(m => {
+      if (m === dyn) return;
+      if (m.getAttribute('content') !== color) {
+        m.setAttribute('content', color);
+      }
+    });
+  } catch(_){}
+}
+function theme(){
+  const h=document.documentElement;
+  const body=document.body;
+  const nextTheme = h.getAttribute('data-theme')==='dark'?'light':'dark';
+  const nextBg = nextTheme === 'light' ? '#FBF8F2' : '#000000';
+
+  // Suppress background-color transitions on html/body/.m-nav layers so
+  // their bg snaps on the same frame as the toolbar meta update. The
+  // rest of the page keeps its normal --tc cross-fade.
+  h.classList.add('theme-switching');
+
+  // Update theme-color metas BEFORE data-theme flips, so iOS Safari's
+  // address-bar pill has the right target color queued the moment the
+  // theme-driven repaint begins.
+  // Note: syncThemeColor reads the current data-theme; flip the attr
+  // first inside a microtask order — set it, then sync — keeps logic
+  // simple and works in practice because Safari samples the meta on
+  // its next paint, which is after data-theme is set.
+  h.setAttribute('data-theme', nextTheme);
+  syncThemeColor();
+
+  // Force the html/body background inline so the canvas under the
+  // Safari toolbar is the new theme color this frame, not the old one
+  // mid-transition. .theme-switching suppresses the transition, so
+  // this is an instant snap, not a cross-fade.
+  try {
+    h.style.backgroundColor = nextBg;
+    if (body) body.style.backgroundColor = nextBg;
+  } catch(_){}
+
+  // After two rAFs the new frame is committed; restore transitions and
+  // drop the inline background overrides so the CSS rules take over.
+  // A small timeout fallback guards against rAF being throttled in
+  // background tabs.
+  let cleared = false;
+  const clear = ()=>{
+    if (cleared) return;
+    cleared = true;
+    try {
+      h.style.backgroundColor = '';
+      if (body) body.style.backgroundColor = '';
+    } catch(_){}
+    h.classList.remove('theme-switching');
+    // Nudge for iOS Safari which sometimes ignores the first meta change.
+    try { syncThemeColor(); } catch(_){}
+  };
+  try {
+    requestAnimationFrame(()=>{ requestAnimationFrame(clear); });
+  } catch(_){}
+  setTimeout(clear, 120);
+}
+// Run once on initial load so the dynamic meta matches the boot theme.
+try { syncThemeColor(); } catch(_){}
+
+// ============ CHIPS — state-gated, click-based, stable ============
+// Click (not pointerdown) is used so that:
+//   - the browser's own tap-to-click resolution handles touch ghosting
+//   - rapid mobile taps don't double-fire and leave chips stuck
+// Selection is only permitted when cart total >= 1. The CSS rule on
+// [data-chips-locked="1"] + (hover:none) blocks tap events on touch
+// devices entirely while locked; this JS check is the desktop equivalent.
+(function(){
+  document.addEventListener('click',(e)=>{
+    const t = e.target;
+    if(!t || !t.classList || !t.classList.contains('chip')) return;
+    // Gate: chips can only be selected if there is at least one drink in cart.
+    if (document.documentElement.getAttribute('data-chips-locked') === '1') {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    e.stopPropagation();
+    t.classList.toggle('sel');
+  });
+})();
+
+// ============ VIEW SWITCHING ============
+// Cross-view transitions (main ↔ contact) use a fade-out → reposition
+// → fade-in sequence so users never see "land on hero, then scroll down."
+// Same-view section nav (e.g. main → main #menu) uses native
+// scrollIntoView({behavior:'smooth'}).
+//
+// Timing:
+//   - LEAVE:  200ms fade-out of the current view
+//   - SWAP:   instant DOM swap + scroll position set while opacity is 0
+//   - ENTER:  260ms fade-in of the new view
+//
+// Hero boot only replays when the user intentionally targets Home/Hero
+// from a different view. It does NOT replay just because someone is
+// returning to the main view at a non-hero anchor.
+
+let _viewBusy = false;
+// Scroll-spy lock. While true, the active-nav IntersectionObserver
+// must not override the nav state set by an explicit click. This covers
+// (a) same-view smooth-scroll triggered by nav click, and
+// (b) cross-view transitions (kept locked via _viewBusy as well).
+let _navLock = false;
+let _navLockTimer = null;
+function lockNavSpy(maxMs){
+  _navLock = true;
+  if(_navLockTimer) clearTimeout(_navLockTimer);
+  // Prefer scrollend when available; always keep a timeout safety net.
+  const release = ()=>{
+    _navLock = false;
+    if(_navLockTimer){ clearTimeout(_navLockTimer); _navLockTimer = null; }
+    window.removeEventListener('scrollend', release);
+  };
+  if('onscrollend' in window){
+    window.addEventListener('scrollend', release, {once:true});
+  }
+  _navLockTimer = setTimeout(release, maxMs || 1300);
+}
+
+function goView(view, anchor){
+  if(_viewBusy) return;
+  const frame = document.querySelector('.frame');
+  const currentView = document.querySelector('.view.on');
+  const targetEl = document.getElementById('view-'+view);
+  if(!frame || !targetEl) return;
+
+  // Same-view section navigation: don't disturb the fade state. Native
+  // smooth scroll on modern browsers handles the easing; lockNavSpy keeps
+  // the clicked nav state highlighted until scroll settles (scrollend).
+  if(currentView === targetEl){
+    syncNavState(view, anchor);
+    lockNavSpy(1300);
+    if(anchor){
+      const el = document.getElementById(anchor);
+      if(el){ el.scrollIntoView({behavior:'smooth', block:'start'}); return; }
+    }
+    window.scrollTo({top:0, behavior:'smooth'});
+    return;
+  }
+
+  _viewBusy = true;
+  // Cross-view: keep scroll-spy locked through the whole transition,
+  // and promote the page to route-transitioning so the scroll rail
+  // (which lives outside .frame) is suppressed too. Without this,
+  // the rail would briefly flash a progress-bar during the swap.
+  _navLock = true;
+  document.documentElement.classList.add('route-transitioning');
+  syncNavState(view, anchor);
+
+  // Whether this transition needs the hero boot to replay on arrival.
+  // Hero replays only for intentional Home/Hero nav from a different view
+  // (anchor 'hero' or no anchor — e.g. logo click).
+  const needsHeroReplay = (view==='main' && (anchor==='hero' || !anchor));
+
+  // Stage 1 — fade the current view out.
+  frame.classList.add('view-leaving');
+
+  setTimeout(()=>{
+    // Stage 2 — DOM swap + position while invisible.
+    // .view-swapping fully hides the frame for the swap tick so a height
+    // change between views can't be seen as a scroll jump underneath the
+    // fade.
+    frame.classList.add('view-swapping');
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+    targetEl.classList.add('on');
+
+    // Position to anchor (or top) without smooth scrolling — the user
+    // is currently looking at a hidden frame, so an instant scroll reads
+    // as arriving in the right place rather than scrolling there.
+    const prevBehavior = document.documentElement.style.scrollBehavior;
+    document.documentElement.style.scrollBehavior='auto';
+    if(anchor){
+      const el=document.getElementById(anchor);
+      if(el){
+        el.scrollIntoView({block:'start'});
+      } else {
+        window.scrollTo(0,0);
+      }
+    } else {
+      window.scrollTo(0,0);
+    }
+    // When returning to the hero, also snap to absolute top — scrollIntoView
+    // on #hero can leave a 1–2px offset depending on margins/snap, and the
+    // hero should always start flush at 0.
+    if(needsHeroReplay){ window.scrollTo(0,0); }
+
+    // CRITICAL: if we're about to replay the hero boot, reset the hero
+    // to its pre-boot state RIGHT NOW — while the frame is still hidden.
+    // If we wait until after the fade-in starts, the user briefly sees
+    // the completed hero fading in before it snaps back to invisible
+    // and re-boots.
+    if(needsHeroReplay){ resetHeroToPreBoot(); }
+
+    // Restore scroll-behavior on the next frame so subsequent in-view
+    // navigation still gets the smooth scroll.
+    requestAnimationFrame(()=>{
+      document.documentElement.style.scrollBehavior = prevBehavior || '';
+    });
+
+    // Reset reveal observers in the newly-visible view.
+    document.querySelectorAll('#view-'+view+' .r').forEach(el=>{
+      el.classList.remove('v');
+      ro.observe(el);
+    });
+
+    // Stage 3 — flip to entering, then drop the state on the next frame
+    // so the .view.on opacity transition takes the new view from 0 → 1.
+    frame.classList.remove('view-leaving');
+    frame.classList.add('view-entering');
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        // Drop view-swapping at the same moment we drop view-entering —
+        // the new view becomes visible already at its correct scroll
+        // position, so no layout/scroll motion is visible.
+        frame.classList.remove('view-swapping');
+        frame.classList.remove('view-entering');
+        // Kick the hero boot animation in the same frame that the view
+        // starts fading in. The hero is already in its pre-boot state
+        // (set above, before this frame became visible), so playHeroReveal
+        // will start from zero — no flash of the completed hero.
+        if(needsHeroReplay){ playHeroReveal(); }
+      });
+    });
+
+    // Release the busy lock + route-transitioning flag once fade-in is done.
+    setTimeout(()=>{
+      _viewBusy = false;
+      _navLock = false;
+      document.documentElement.classList.remove('route-transitioning');
+    }, 280);
+  }, 200);
+}
+
+// Helper: sync sidebar / mobile nav active state without duplicating
+// the selector logic inside goView's branches.
+function syncNavState(view, anchor){
+  document.querySelectorAll('.s-btn, .m-btn').forEach(b=>b.classList.remove('on'));
+  const navKey = view==='contact' ? 'contact' : (anchor || 'hero');
+  document.querySelectorAll(`[data-nav="${navKey}"]`).forEach(b=>b.classList.add('on'));
+}
+
+// ============ MENU TABS ============
+function tab(btn, panel){
+  document.querySelectorAll('.menu-tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.menu-panel').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('p-'+panel).classList.add('on');
+}
+
+// ============ FAQ ============
+function faq(btn){
+  const item=btn.parentElement;
+  const open=item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i=>i.classList.remove('open'));
+  if(!open) item.classList.add('open');
+}
+
+// ============ SEASONAL ============
+// Mobile seasonal expand behavior
+function toggleCard(el, e) {
+  if (window.innerWidth > 768) return; // hover handles desktop
+  e = e || window.event;
+  if (e && e.target && e.target.closest('.s-card-add, .m-ctrls, .m-ctrl')) return;
+  
+  const expanded = el.classList.contains('expanded');
+  const siblings = el.parentElement.querySelectorAll('.s-card');
+  siblings.forEach(s => s.classList.remove('expanded'));
+  if (!expanded) el.classList.add('expanded');
+}
+
+// ============ CART ============
+// Map-based cart state: key = item name, value = quantity. Total = sum of qty.
+// Each item's add button (menu .m-add or seasonal .s-card-add) is replaced
+// in-place with a .m-ctrls stepper (- / qty / +) once qty >= 1. When qty
+// drops to 0 via minus, the stepper is swapped back to a fresh add button.
+// There is no separate remove button. When the cart total reaches 0, the
+// FAB hides and all selected flavor/add-in chips are cleared (see chip
+// lockout logic).
+const cartItems = new Map(); // name -> qty
+
+function cartTotal(){
+  let n=0;
+  cartItems.forEach(q=>{ n+=q; });
+  return n;
+}
+
+function getItemName(btn){
+  // Seasonal cards carry data-name on the add button directly.
+  const dn = btn.getAttribute && btn.getAttribute('data-name');
+  if (dn) return dn;
+  // Menu items: name lives in the sibling .m-item-info > .m-item-name.
+  const row = btn.closest && btn.closest('.m-item');
+  if (row) {
+    const nm = row.querySelector('.m-item-name');
+    if (nm) return nm.textContent.trim();
+  }
+  // Fallback: ancestor s-card-name (defensive — seasonal should hit data-name).
+  const sc = btn.closest && btn.closest('.s-card');
+  if (sc) {
+    const nm = sc.querySelector('.s-card-name');
+    if (nm) return nm.textContent.trim();
+  }
+  return null;
+}
+
+function updateCartFab(){
+  const fab = document.getElementById('cartFab');
+  const count = document.getElementById('cartCount');
+  if (!fab || !count) return;
+  const total = cartTotal();
+  count.textContent = total;
+  if (total > 0) {
+    fab.classList.add('show');
+    count.classList.remove('cart-pop');
+    void count.offsetWidth;
+    count.classList.add('cart-pop');
+  } else {
+    fab.classList.remove('show');
+    // Cart emptied — clear all selected chips and lock chips again.
+    clearAllChips();
+  }
+  setChipsLocked(total === 0);
+}
+
+function makeCtrlsHTML(qty){
+  return ''
+    + '<button class="m-ctrl m-ctrl-minus" type="button" aria-label="Decrease quantity">'
+      + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>'
+    + '</button>'
+    + '<span class="m-ctrl-qty">' + qty + '</span>'
+    + '<button class="m-ctrl m-ctrl-plus" type="button" aria-label="Increase quantity">'
+      + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
+    + '</button>';
+}
+
+function swapAddToCtrls(addBtn, name, qty){
+  // Replace the .m-add / .s-card-add button with a .m-ctrls group, carrying
+  // the same data-name so subsequent -/+ clicks can resolve identity.
+  const ctrls = document.createElement('div');
+  ctrls.className = 'm-ctrls';
+  ctrls.setAttribute('data-name', name);
+  // Preserve which "slot" this is so we can swap back to the right element.
+  if (addBtn.classList.contains('s-card-add')) {
+    ctrls.setAttribute('data-slot', 's-card-add');
+  } else {
+    ctrls.setAttribute('data-slot', 'm-add');
+  }
+  ctrls.innerHTML = makeCtrlsHTML(qty);
+  addBtn.replaceWith(ctrls);
+  bindCtrls(ctrls);
+}
+
+function swapCtrlsToAdd(ctrls){
+  const name = ctrls.getAttribute('data-name') || '';
+  const slot = ctrls.getAttribute('data-slot') || 'm-add';
+  const btn = document.createElement('button');
+  if (slot === 's-card-add') {
+    btn.className = 's-card-add';
+    btn.setAttribute('data-name', name);
+    btn.setAttribute('aria-label', 'Add ' + name + ' to cart');
+  } else {
+    btn.className = 'm-add';
+    btn.setAttribute('aria-label', 'Add');
+  }
+  btn.setAttribute('type', 'button');
+  btn.setAttribute('onclick', 'addCart(this)');
+  btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+  ctrls.replaceWith(btn);
+}
+
+function updateCtrlsQty(ctrls, qty){
+  const q = ctrls.querySelector('.m-ctrl-qty');
+  if (q) q.textContent = qty;
+}
+
+function bindCtrls(ctrls){
+  const minus = ctrls.querySelector('.m-ctrl-minus');
+  const plus = ctrls.querySelector('.m-ctrl-plus');
+  if (minus) minus.addEventListener('click', (e)=>{ e.stopPropagation(); decItem(ctrls); });
+  if (plus) plus.addEventListener('click', (e)=>{ e.stopPropagation(); incItem(ctrls); });
+}
+
+function addCart(btn){
+  const name = getItemName(btn);
+  if (!name) return;
+  const next = (cartItems.get(name) || 0) + 1;
+  cartItems.set(name, next);
+  // Swap add button for controls. The swap itself is the visual feedback.
+  swapAddToCtrls(btn, name, next);
+  updateCartFab();
+}
+
+function incItem(ctrls){
+  const name = ctrls.getAttribute('data-name');
+  if (!name) return;
+  const next = (cartItems.get(name) || 0) + 1;
+  cartItems.set(name, next);
+  updateCtrlsQty(ctrls, next);
+  updateCartFab();
+}
+
+function decItem(ctrls){
+  const name = ctrls.getAttribute('data-name');
+  if (!name) return;
+  const current = cartItems.get(name) || 0;
+  const next = current - 1;
+  if (next <= 0) {
+    cartItems.delete(name);
+    swapCtrlsToAdd(ctrls);
+  } else {
+    cartItems.set(name, next);
+    updateCtrlsQty(ctrls, next);
+  }
+  updateCartFab();
+}
+
+// ============ CHIPS — state-based, stable selection ============
+// Chips are only selectable when cart total >= 1. On desktop they remain
+// hoverable (the CSS :hover preview still fires) but the .sel class won't
+// be applied while the chip lock is engaged. When cart empties, all .sel
+// chips are cleared.
+function setChipsLocked(locked){
+  try {
+    if (locked) document.documentElement.setAttribute('data-chips-locked', '1');
+    else document.documentElement.removeAttribute('data-chips-locked');
+  } catch(_){}
+}
+
+function clearAllChips(){
+  document.querySelectorAll('.chip.sel').forEach(c=>c.classList.remove('sel'));
+}
+
+// Initial state: cart empty -> chips locked.
+setChipsLocked(true);
+
+
+// ============ FORM ============
+function submitForm(e){
+  e.preventDefault();
+  const btn=e.target.querySelector('.form-submit');
+  const original=btn.innerHTML;
+  btn.innerHTML='Submitted ✓';
+  btn.style.background='var(--mint)';
+  setTimeout(()=>{
+    btn.innerHTML=original;
+    btn.style.background='';
+    e.target.reset();
+  },2400);
+}
+
+// ============ REVEAL ============
+const ro=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('v');
+      ro.unobserve(e.target);
+    }
+  });
+},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.r').forEach(el=>ro.observe(el));
+
+// ============ ACTIVE NAV ON SCROLL ============
+const navMap={hero:'hero',seasonal:'menu',menu:'menu',about:'about',reviews:'about',faq:'about'};
+const so=new IntersectionObserver((entries)=>{
+  // Bail while a programmatic scroll, view transition, or initial boot
+  // is in progress. The clicked/initial nav state must win until motion
+  // settles.
+  if(_viewBusy || _navLock) return;
+  if(document.documentElement.classList.contains('booting')) return;
+  if(!document.getElementById('view-main').classList.contains('on')) return;
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const key=navMap[e.target.id];
+      if(!key) return;
+      document.querySelectorAll('.s-btn, .m-btn').forEach(b=>b.classList.remove('on'));
+      document.querySelectorAll(`[data-nav="${key}"]`).forEach(b=>b.classList.add('on'));
+    }
+  });
+},{threshold:0.35});
+['hero','seasonal','menu','about','reviews','faq'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el) so.observe(el);
+});
+
+// ============ REVIEWS CAROUSEL ============
+const track=document.getElementById('rTrack');
+const dots=document.getElementById('rDots');
+const prev=document.getElementById('rPrev');
+const next=document.getElementById('rNext');
+const cards=track.children.length;
+let visible=window.innerWidth>1024?3:(window.innerWidth>768?2:1);
+let maxIdx=Math.max(0,cards-visible);
+let idx=0;
+function buildDots(){
+  dots.innerHTML='';
+  for(let i=0;i<=maxIdx;i++){
+    const d=document.createElement('button');
+    d.className='r-dot'+(i===0?' on':'');
+    d.onclick=()=>{idx=i;update()};
+    dots.appendChild(d);
+  }
+}
+function update(){
+  const card=track.children[0];
+  const w=card.offsetWidth + 24;
+  track.style.transform=`translateX(-${idx*w}px)`;
+  dots.querySelectorAll('.r-dot').forEach((d,i)=>d.classList.toggle('on',i===idx));
+  prev.disabled=idx===0;
+  next.disabled=idx>=maxIdx;
+}
+prev.onclick=()=>{if(idx>0){idx--;update()}};
+next.onclick=()=>{if(idx<maxIdx){idx++;update()}};
+window.addEventListener('resize',()=>{
+  visible=window.innerWidth>1024?3:(window.innerWidth>768?2:1);
+  maxIdx=Math.max(0,cards-visible);
+  if(idx>maxIdx) idx=maxIdx;
+  buildDots();update();
+});
+buildDots();update();
+
+// ============ TICKER ============
+const beeSvg=`<img src="logo.jpg" alt="">`;
+const phrases=['The Flower Shop Coffee Co.','Quality Coffee &amp; Tea','Handcrafted Drinks','Local Roasts','Seasonal Specials','Hidden Gem'];
+let tHTML='';
+for(let i=0;i<2;i++){
+  phrases.forEach(p=>{
+    tHTML+=`<span class="ticker-item">${p}<span class="ticker-bee">${beeSvg}</span></span>`;
+  });
+}
+const tickerEl=document.getElementById('ticker');
+if(tickerEl) tickerEl.innerHTML=tHTML;
+const tickerContactEl=document.getElementById('ticker-contact');
+if(tickerContactEl) tickerContactEl.innerHTML=tHTML;
+
+// ============ OVERLAY SCROLL RAIL ============
+(function(){
+  const rail=document.getElementById('scrollRail');
+  const thumb=document.getElementById('scrollThumb');
+  if(!rail||!thumb) return;
+  let hideTimer=null;
+  function updateRail(){
+    // Suppress the rail entirely during initial boot and during cross-view
+    // route transitions. CSS already hides it via the html.* veil classes,
+    // but bailing here also prevents `.active` from being added during
+    // the moment those classes are about to be removed.
+    const docRoot = document.documentElement;
+    if(docRoot.classList.contains('booting') || docRoot.classList.contains('route-transitioning')){
+      rail.classList.remove('active');
+      return;
+    }
+    const docH=document.documentElement.scrollHeight - window.innerHeight;
+    if(docH<10){rail.classList.remove('active');return;}
+    const scrolled=window.scrollY;
+    const pct=Math.min(1,scrolled/docH);
+    const railH=rail.clientHeight;
+    const thumbH=Math.max(32, railH * (window.innerHeight/document.documentElement.scrollHeight));
+    thumb.style.height=thumbH+'px';
+    thumb.style.top=(pct * (railH - thumbH))+'px';
+    rail.classList.add('active');
+    clearTimeout(hideTimer);
+    hideTimer=setTimeout(()=>rail.classList.remove('active'), 1000);
+  }
+  window.addEventListener('scroll', updateRail, {passive:true});
+  window.addEventListener('resize', updateRail);
+})();
+
+// ============ KICK OFF HERO REVEAL ============
+// Single boot path: wait for fonts AND window load (whichever finishes last)
+// before triggering the reveal. Falls back gracefully if document.fonts is
+// unsupported. bootHero() is idempotent — guard inside prevents double-fire.
+// Safety net: a 2500ms hard timer also calls bootHero() so the boot veil
+// can never trap the page if a dependency hangs.
+(function(){
+  let fontsReady = false;
+  let loaded = (document.readyState === 'complete');
+  function tryBoot(){
+    if(fontsReady && loaded) bootHero();
+  }
+  // Fonts ready (or timeout fallback at 1500ms so we never hang on slow CDNs)
+  if(document.fonts && document.fonts.ready){
+    document.fonts.ready.then(()=>{fontsReady=true;tryBoot();});
+    setTimeout(()=>{if(!fontsReady){fontsReady=true;tryBoot();}}, 1500);
+  } else {
+    fontsReady = true;
+  }
+  // Window load
+  if(loaded){
+    tryBoot();
+  } else {
+    window.addEventListener('load', ()=>{loaded=true;tryBoot();}, {once:true});
+  }
+  // Hard safety net.
+  setTimeout(()=>{ try { bootHero(); } catch(_){} }, 2500);
+})();
+</script>
+</body>
+</html>
